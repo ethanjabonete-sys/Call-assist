@@ -1,0 +1,1011 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>OA Live Call Assist v2</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --navy:#0f1729; --navy2:#1b2540; --ink:#0f1729; --muted:#5b6478; --line:#e3e7ef; --bg:#f5f7fb; --card:#fff;
+  --pink:#d6006e; --pink-soft:#fde7f2; --green:#0a8f5a; --green-soft:#e3f6ee; --amber:#b86e00; --amber-soft:#fff3dc;
+  --red:#c62828; --red-soft:#fdecec; --blue:#2457d6; --blue-soft:#e8efff;
+  --mono:'JetBrains Mono',ui-monospace,Menlo,monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,sans-serif;font-size:14px;line-height:1.5}
+button{font-family:inherit;cursor:pointer}
+input,select,textarea{font-family:inherit;font-size:13px}
+.top{background:var(--navy);color:#fff;padding:10px 16px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;position:sticky;top:0;z-index:30}
+.brand{font-weight:800;letter-spacing:.02em;display:flex;align-items:center;gap:8px}
+.brand .dot{width:26px;height:26px;border-radius:7px;background:var(--pink);display:grid;place-items:center;font-size:12px}
+.brand small{font-weight:500;opacity:.6;font-size:11px}
+.tabs{display:flex;gap:4px;flex-wrap:wrap}
+.tabs button{background:transparent;border:0;color:#c8cfe0;padding:7px 11px;border-radius:7px;font-size:12px;font-weight:600;letter-spacing:.03em}
+.tabs button.on{background:var(--pink);color:#fff}
+.tabs button:hover:not(.on){background:var(--navy2);color:#fff}
+.spacer{flex:1}
+.clock{display:flex;gap:10px;align-items:center;font-size:12px}
+.clock .pill{background:var(--navy2);padding:5px 10px;border-radius:999px;white-space:nowrap}
+.clock b{font-family:var(--mono);font-weight:500}
+.win{padding:5px 10px;border-radius:999px;font-weight:700;font-size:11px;letter-spacing:.03em}
+.win.good{background:#0a8f5a}.win.ok{background:#b86e00}.win.bad{background:#c62828}
+
+.setup{background:#fff;border-bottom:1px solid var(--line);padding:10px 16px;display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.fld{display:flex;flex-direction:column;gap:3px}
+.fld label{font-size:10px;font-weight:700;letter-spacing:.08em;color:var(--muted);text-transform:uppercase}
+.fld input,.fld select{border:1px solid var(--line);border-radius:7px;padding:7px 9px;min-width:120px;background:#fff}
+.regions{display:flex;gap:4px}
+.regions button{border:1px solid var(--line);background:#fff;border-radius:7px;padding:7px 10px;font-weight:700;font-size:12px}
+.regions button.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.regions button .f{font-size:14px;margin-right:4px}
+
+.wrap{display:grid;grid-template-columns:190px minmax(0,1fr) 340px;gap:14px;padding:14px 16px;max-width:1500px;margin:0 auto}
+@media (max-width:1150px){.wrap{grid-template-columns:1fr}.steps{display:flex;overflow:auto}.steps button{min-width:140px}}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+.card h3{margin:0 0 10px;font-size:12px;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.steps{display:flex;flex-direction:column;gap:6px}
+.steps button{text-align:left;border:1px solid var(--line);background:#fff;border-radius:9px;padding:9px 10px;font-weight:600;font-size:13px;display:flex;gap:8px;align-items:center}
+.steps button .n{width:22px;height:22px;border-radius:6px;background:var(--bg);display:grid;place-items:center;font-size:11px;font-weight:800;color:var(--muted);flex:none}
+.steps button.on{border-color:var(--pink);box-shadow:0 0 0 2px var(--pink-soft)}
+.steps button.on .n{background:var(--pink);color:#fff}
+.steps button.done .n{background:var(--green);color:#fff}
+.styleCard{margin-top:12px;font-size:12px}
+.styleCard .tag{display:inline-block;background:var(--blue-soft);color:var(--blue);border-radius:5px;padding:1px 6px;margin:2px 2px 0 0;font-weight:600;font-size:11px}
+.styleCard .tag.no{background:var(--red-soft);color:var(--red);text-decoration:line-through}
+
+.stepHead{display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.stepHead h2{margin:0;font-size:19px}
+.badge{font-size:10px;font-weight:800;letter-spacing:.08em;padding:3px 7px;border-radius:5px;background:var(--bg);color:var(--muted);text-transform:uppercase}
+.goal{color:var(--muted);font-size:13px;margin:0 0 12px}
+.say{background:#fbfcff;border:1px solid var(--line);border-left:4px solid var(--pink);border-radius:10px;padding:14px 16px;font-size:16.5px;line-height:1.65;margin:10px 0;white-space:pre-wrap}
+.say .tok{background:var(--pink-soft);color:var(--pink);border-radius:4px;padding:0 3px;font-weight:600}
+.say .tok.empty{background:#fff3dc;color:var(--amber)}
+.say .p{color:#9aa3b5;font-style:italic;font-size:13px}
+.say .q{font-weight:700}
+.sayLabel{font-size:10px;font-weight:800;letter-spacing:.1em;color:var(--muted);text-transform:uppercase;margin-top:14px;display:flex;justify-content:space-between;align-items:center}
+.copy{border:0;background:none;color:var(--blue);font-size:11px;font-weight:700}
+.tip{background:var(--amber-soft);border-radius:9px;padding:10px 12px;font-size:12.5px;margin-top:10px}
+.tip b{color:var(--amber)}
+.why{background:var(--blue-soft);border-radius:9px;padding:10px 12px;font-size:12.5px;margin-top:8px}
+.why b{color:var(--blue)}
+.never{background:var(--red-soft);border-radius:9px;padding:10px 12px;font-size:12.5px;margin-top:8px}
+.never b{color:var(--red)}
+.floor{border:1px dashed #c9d2e6;border-radius:9px;padding:9px 12px;font-size:12.5px;margin-top:8px;background:#fff}
+.floor b{color:var(--navy)}
+.branches{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}
+.branches button{border-radius:8px;padding:8px 11px;font-size:12.5px;font-weight:600;border:1px solid var(--line);background:#fff}
+.branches button.go{background:var(--green);color:#fff;border-color:var(--green)}
+.branches button.obj{background:#fff;border-color:#f3b6d3;color:var(--pink)}
+.branches button.stop{border-color:#f0b4b4;color:var(--red)}
+.qlist{margin:6px 0 0;padding:0;list-style:none}
+.qlist li{padding:8px 10px;border:1px solid var(--line);border-radius:8px;margin-bottom:6px;background:#fff;font-size:14px;display:flex;gap:8px}
+.qlist li .k{font-size:10px;font-weight:800;color:var(--muted);min-width:64px;letter-spacing:.06em;text-transform:uppercase;padding-top:2px}
+
+.gate .row{display:grid;grid-template-columns:1fr;gap:4px;margin-bottom:9px}
+.gate label{font-size:11px;font-weight:700;color:var(--muted)}
+.gate input[type=text],.gate input[type=number],.gate select,.gate textarea{width:100%;border:1px solid var(--line);border-radius:7px;padding:6px 8px;background:#fff}
+.gate textarea{resize:vertical;min-height:34px}
+.chk{display:flex;gap:6px;align-items:flex-start;font-size:12px;margin:3px 0}
+.chk input{margin-top:3px}
+.verdict{border-radius:10px;padding:11px 12px;margin-bottom:12px;font-size:12.5px}
+.verdict .big{font-size:15px;font-weight:800;letter-spacing:.02em;display:block;margin-bottom:3px}
+.verdict.book{background:var(--green-soft);color:#065c3a}
+.verdict.hold{background:var(--amber-soft);color:#7a4a00}
+.verdict.no{background:var(--red-soft);color:#8e1c1c}
+.verdict ul{margin:4px 0 0;padding-left:17px}
+.mini{font-size:11px;color:var(--muted)}
+.sep{height:1px;background:var(--line);margin:12px 0}
+
+.stats .grid{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.stats button.ct{border:1px solid var(--line);background:#fff;border-radius:9px;padding:8px 4px;text-align:center}
+.stats button.ct b{display:block;font-size:20px;font-family:var(--mono)}
+.stats button.ct span{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.05em;text-transform:uppercase}
+.stats button.ct.bk{border-color:var(--green);background:var(--green-soft)}
+.bar{height:10px;background:var(--bg);border-radius:99px;overflow:hidden;margin:6px 0}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--pink),#ff7ab8);border-radius:99px;transition:width .4s}
+.motiv{font-size:12.5px;background:var(--navy);color:#fff;border-radius:10px;padding:10px 12px;margin-top:8px}
+.motiv b{color:#ff8cc6}
+.lvl{display:flex;justify-content:space-between;font-size:12px;font-weight:700;margin-top:8px}
+.badges{display:flex;flex-wrap:wrap;gap:4px;margin-top:6px}
+.badges span{font-size:11px;background:var(--bg);border-radius:6px;padding:2px 7px;font-weight:600}
+.badges span.got{background:#fff0c2}
+
+.page{max-width:1200px;margin:0 auto;padding:16px}
+.searchbar{display:flex;gap:8px;margin-bottom:12px}
+.searchbar input{flex:1;border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-size:14px}
+.rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:12px}
+.rcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px}
+.rcard h4{margin:0 0 4px;font-size:14.5px}
+.rcard .trig{font-size:11.5px;color:var(--muted);font-style:italic;margin-bottom:6px}
+.rcard .say{font-size:14px;padding:10px 12px}
+.cat{font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--pink)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:800px){.two{grid-template-columns:1fr}}
+.dd li{margin-bottom:7px;font-size:13.5px}
+.dd .src{font-size:11px;color:var(--muted)}
+table.say-not{width:100%;border-collapse:collapse;font-size:13px}
+table.say-not td,table.say-not th{border-bottom:1px solid var(--line);padding:8px;text-align:left;vertical-align:top}
+table.say-not th{font-size:11px;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.regionCards{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:12px}
+.rc h4{margin:0;font-size:17px}
+.rc .now{font-family:var(--mono);font-size:12px;color:var(--muted)}
+.rc ul{padding-left:18px;margin:6px 0}
+.rc li{margin-bottom:4px;font-size:13px}
+.out{white-space:pre-wrap;background:#fbfcff;border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-size:13px;font-family:var(--mono);line-height:1.55}
+.modalBg{position:fixed;inset:0;background:rgba(15,23,41,.45);display:none;align-items:flex-start;justify-content:center;z-index:50;padding:60px 16px;overflow:auto}
+.modalBg.show{display:flex}
+.modal{background:#fff;border-radius:14px;max-width:720px;width:100%;padding:18px 20px;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.modal .x{float:right;border:0;background:var(--bg);border-radius:7px;padding:4px 9px;font-weight:700}
+.kbd{font-family:var(--mono);font-size:10.5px;border:1px solid var(--line);border-bottom-width:2px;border-radius:4px;padding:0 4px;background:#fff;color:var(--muted)}
+.toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:10px 16px;border-radius:10px;font-weight:600;z-index:60;opacity:0;transition:opacity .25s;pointer-events:none}
+.toast.show{opacity:1}
+.confetti{position:fixed;inset:0;pointer-events:none;z-index:70;overflow:hidden}
+.confetti i{position:absolute;top:-12px;width:8px;height:14px;border-radius:2px;animation:fall 1.8s linear forwards}
+@keyframes fall{to{transform:translateY(105vh) rotate(720deg)}}
+.hidden{display:none!important}
+.foot{color:var(--muted);font-size:11px;text-align:center;padding:16px}
+</style>
+</head>
+<body>
+<div class="top">
+  <div class="brand"><div class="dot">OA</div><div>LIVE CALL ASSIST <small>v2 · region-aware</small></div></div>
+  <div class="tabs" id="tabs">
+    <button data-tab="live" class="on">LIVE CALL</button>
+    <button data-tab="rebuttals">REBUTTALS <span class="kbd">/</span></button>
+    <button data-tab="regions">REGION GUIDE</button>
+    <button data-tab="rules">DO &amp; DON'T</button>
+    <button data-tab="log">RECAP &amp; LOG</button>
+    <button data-tab="me">MY GAME</button>
+  </div>
+  <div class="spacer"></div>
+  <div class="clock">
+    <span class="pill">Lead time <b id="leadTime">--:--</b> <span id="leadTz"></span></span>
+    <span class="pill">PHT <b id="phtTime">--:--</b></span>
+    <span class="win" id="winBadge">—</span>
+  </div>
+</div>
+
+<div class="setup">
+  <div class="fld"><label>Region</label>
+    <div class="regions" id="regionBtns"></div>
+  </div>
+  <div class="fld"><label>Lead time zone</label><select id="tzSel"></select></div>
+  <div class="fld"><label>Your name</label><input id="f_me" placeholder="e.g. Jenny"></div>
+  <div class="fld"><label>Lead first name</label><input id="f_lead" placeholder="e.g. Sharon"></div>
+  <div class="fld"><label>Company</label><input id="f_company" placeholder="e.g. TruHoney"></div>
+  <div class="fld"><label>Their title</label><input id="f_title" placeholder="e.g. Operations Manager"></div>
+  <div class="fld"><label>Industry</label><input id="f_industry" placeholder="e.g. food export"></div>
+  <div class="fld"><label>&nbsp;</label><button class="copy" id="newLead" style="border:1px solid var(--line);border-radius:7px;padding:7px 10px;background:#fff">↺ New lead</button></div>
+</div>
+
+<!-- LIVE CALL -->
+<section id="tab-live">
+  <div class="wrap">
+    <div>
+      <div class="steps" id="steps"></div>
+      <div class="card styleCard" id="styleCard"></div>
+    </div>
+    <div class="card" id="stepCard"></div>
+    <div>
+      <div class="card gate" id="gate"></div>
+      <div class="card stats" style="margin-top:14px" id="statsMini"></div>
+    </div>
+  </div>
+</section>
+
+<section id="tab-rebuttals" class="hidden"><div class="page">
+  <div class="searchbar"><input id="rSearch" placeholder="Type what the lead said… e.g. 'send me an email', 'how much', 'we have a recruiter'"></div>
+  <div class="rgrid" id="rGrid"></div>
+</div></section>
+
+<section id="tab-regions" class="hidden"><div class="page">
+  <div class="card" style="margin-bottom:12px"><h3>Why the script changes by region</h3>
+  <div id="regionIntro"></div></div>
+  <div class="regionCards" id="regionCards"></div>
+</div></section>
+
+<section id="tab-rules" class="hidden"><div class="page" id="rulesPage"></div></section>
+
+<section id="tab-log" class="hidden"><div class="page">
+  <div class="two">
+    <div class="card"><h3>Recap to read out (lead's own words)</h3><div class="out" id="recapOut"></div><button class="copy" data-copy="recapOut">Copy</button></div>
+    <div class="card"><h3>HubSpot note (only what the lead said)</h3><div class="out" id="noteOut"></div><button class="copy" data-copy="noteOut">Copy</button></div>
+  </div>
+  <div class="two" style="margin-top:12px">
+    <div class="card"><h3>Confirmation email to the lead</h3><div class="out" id="emailOut"></div><button class="copy" data-copy="emailOut">Copy</button></div>
+    <div class="card"><h3>Show-up protocol (after every booking)</h3><div id="showProtocol"></div></div>
+  </div>
+</div></section>
+
+<section id="tab-me" class="hidden"><div class="page" id="mePage"></div></section>
+
+<div class="modalBg" id="modalBg"><div class="modal" id="modal"></div></div>
+<div class="toast" id="toast"></div>
+<div class="foot">Built for the DEV team · Script blends floor-tested lines from Marc, Vincent, Summer, Jenny, Pedro &amp; Jesley with SP dispute lessons and outside cold-calling research. Keep it human: read the intent, not the words.</div>
+<script>
+// ======================= EDITABLE CAMPAIGN SETTINGS =======================
+// TLs: change these in one place and every line in the tool updates.
+const CONFIG = {
+  savings: "50 to 70%",                 // market claim only - never a quote
+  partners: "80+",                      // size of the vetted BPO partner network
+  meeting: "15 minutes each",           // length of each back-to-back discovery call
+  voucher: { US:"$100 Amazon voucher", CA:"$100 Amazon voucher", UK:"£50 Amazon voucher", AU:"$100 Amazon voucher", NZ:"$100 Amazon voucher" }, // confirm current amounts with SP team
+  dailyBookingGoal: 2,
+  incentiveText: "Ask your TL for this month's DC incentive - every QUALIFIED + ATTENDED DC counts. Disputed DCs don't.",
+  minEmployees: 3                       // Oct 26 Process Alignment: 3+ active employees (FT or PT) can be booked
+};
+
+// ============================== REGIONS ==================================
+const REGIONS = {
+  US:{name:"United States",flag:"🇺🇸",tzs:[["America/New_York","Eastern (ET)"],["America/Chicago","Central (CT)"],["America/Denver","Mountain (MT)"],["America/Phoenix","Arizona (no DST)"],["America/Los_Angeles","Pacific (PT)"]],
+    vibe:"Direct · confident · concise",
+    pace:"Brisk. Reason for the call inside 15–20 seconds. Short sentences, then stop and let them talk.",
+    use:["How've you been?","I'll be quick","straight up","makes sense","totally fair","does that work?"],
+    avoid:["Did I catch you at a bad time?","long company history","over-apologising","'just checking in'"],
+    notes:["Gong data (90k cold calls): opening with “How have you been?” booked 6.6× baseline; “Did I catch you at a bad time?” was ~40% worse than baseline.","Stating a clear reason for the call doubled success (2.1×). Say WHY you called before they ask.","US buyers respect brevity — get to value fast, ask one sharp question, stop talking.","Wednesday and Thursday tend to be the strongest days for cold calls."],
+    ack:"Totally fair.", thanks:"Appreciate that.", bye:"Thanks {lead}, have a great day."},
+  CA:{name:"Canada",flag:"🇨🇦",tzs:[["America/Toronto","Eastern (ET)"],["America/Winnipeg","Central (CT)"],["America/Edmonton","Mountain (MT)"],["America/Vancouver","Pacific (PT)"],["America/Halifax","Atlantic (AT)"]],
+    vibe:"Direct but courteous · no hype",
+    pace:"Like the US but one notch softer. Polite, factual, no hard sell. Respect their time out loud.",
+    use:["How are you today?","I'll respect your time","fair enough","would that be helpful?","thanks for being upfront"],
+    avoid:["aggressive urgency","hype words (game-changer, amazing)","talking over them"],
+    notes:["Canadian buyers blend US directness with British-style courtesy — be clear, but polite.","Aggressive tactics backfire. Under-promise, give facts.","Toronto feels fast like New York; Vancouver is more relationship-led. Quebec may prefer French — offer a colleague if needed."],
+    ack:"That's fair, thanks for being upfront.", thanks:"Thank you, I appreciate that.", bye:"Thanks so much {lead}, have a good one."},
+  UK:{name:"United Kingdom",flag:"🇬🇧",tzs:[["Europe/London","UK (GMT/BST)"],["Europe/Dublin","Ireland"]],
+    vibe:"Warm · polite · conversational — but still clear",
+    pace:"A touch slower. Friendly, a little small talk is fine, then be honest that it's a cold call and say why you rang within ~20 seconds.",
+    use:["Lovely","Brilliant","Cheers","Rang (not 'called')","Have a think","Shall I…?","Would it be worth…?","No worries at all","Sorted","Just a quick one"],
+    avoid:["Awesome / super excited","Hard closes ('let's lock you in')","Pattern-interrupt gimmicks","'Did I catch you at a bad time?'","Explaining their own industry to them"],
+    notes:["Polite-but-assertive beats overly apologetic — too much politeness reads as passive and gets you dismissed.","UK prospects react badly to American-style gimmicks. Owning that it's a cold call + an easy exit builds trust.","Mirror their energy: if they banter, banter back lightly. If they're brisk, be brisk.","Late morning and just after lunch are the strongest UK windows; Tuesday tends to be best.","End of financial year (April) and summer holidays cause 'call me in six months' — lock a dated callback.","Compliance: screen against TPS/CTPS, give your name + company, and remove anyone who asks — immediately."],
+    ack:"That's completely fair, and thanks for being straight with me.", thanks:"Lovely, thank you.", bye:"Brilliant — thanks ever so much {lead}, have a lovely rest of your day. Cheers."},
+  AU:{name:"Australia",flag:"🇦🇺",tzs:[["Australia/Sydney","Sydney/Melb (AEST/AEDT)"],["Australia/Brisbane","Brisbane (no DST)"],["Australia/Adelaide","Adelaide (ACST/ACDT)"],["Australia/Perth","Perth (AWST)"]],
+    vibe:"Casual · straight-talking · zero fluff",
+    pace:"Relaxed and friendly, but get to the point. No bragging — let results speak (tall-poppy syndrome).",
+    use:["How're you going?","No worries","Fair enough","Reckon","Keen to…","Cheers","Look, I'll be upfront"],
+    avoid:["'World's leading…' / big claims","Corporate jargon","Robotic script voice","Forced slang or a fake accent (don't say 'mate' if it's not natural)"],
+    notes:["Aussie buyers prefer casual, authentic conversation and no-nonsense directness.","Tall-poppy syndrome: boasting kills trust. Swap 'world's leading' for a plain fact.","Flat hierarchies: owners decide fast if it makes sense — ask for the decision cleanly.","Queensland and WA don't use daylight saving — check the zone before you propose a time."],
+    ack:"Yeah, fair enough.", thanks:"Appreciate it.", bye:"Cheers {lead}, have a good one."},
+  NZ:{name:"New Zealand",flag:"🇳🇿",tzs:[["Pacific/Auckland","New Zealand (NZST/NZDT)"]],
+    vibe:"Friendly · humble · low-pressure",
+    pace:"Warm and unhurried. Understated claims, no pressure. Trust is the whole game.",
+    use:["Kia ora (optional, if natural)","How's your day going?","No worries","Totally up to you","Keen","Cheers","Sounds good"],
+    avoid:["Pushy closes","Overpromising","Big numbers / bragging","Bargaining tactics"],
+    notes:["Kiwis are direct and honest but wary of big claims — show, don't sell.","High-pressure tactics are a turn-off. Offer the meeting as useful info, with a real exit.","A few seconds of light, impersonal small talk (weather, the week) is normal before business.","The first contact is about whether you can be trusted — do exactly what you say (call back when you said you would)."],
+    ack:"No worries at all, that's fair.", thanks:"Thanks heaps.", bye:"Thanks {lead}, enjoy the rest of your day — cheers."}
+};
+
+// ============================== CALL STEPS ===============================
+// Each script can have a default plus region overrides. Tokens in {braces}.
+const STEPS = [
+ {id:"prep",n:1,title:"Pre-dial (30 sec)",goal:"Know who you're calling before you dial. Bad lists cause half the derailments.",
+  checklist:[
+   "Check headcount (LinkedIn/website). Need "+CONFIG.minEmployees+"+ active employees.",
+   "Recruitment / staffing / labour-hire firm? → you'll ask INTERNAL vs CLIENT role.",
+   "Is the advertised seat actually theirs? If their title ≠ the seat, expect 'that's not me' — have the routing line ready.",
+   "Restricted / government / regulated industry? Check with TL before booking.",
+   "Already has an offshore office? Don't disqualify — ask if it's their own office or an outsourcing firm.",
+   "Lead's local time OK? (see badge top-right). Avoid lunch & end of day Friday."],
+  tip:"Spend ~30 seconds, not 15 minutes. The goal is to avoid the obvious traps, not to write an essay.",
+  branches:[{t:"Ready — dial",go:"open",k:"go"}]},
+
+ {id:"open",n:2,title:"Opener",goal:"Greeting → name & company → honest 'cold call' + reason → one OPEN question. Under 30 seconds.",
+  say:{
+   US:"Hey {lead}, it's {me} with Outsource Accelerator — how've you been? (pause)\n\nGood to hear. I'll be straight with you, this is a cold call, so I'll be quick. Mind if I take 30 seconds to tell you why I called, and you tell me if it's relevant? (pause)\n\nAppreciate that. We're an outsourcing marketplace — we match businesses like {company} with vetted offshore staffing partners, and most roles come in around {savings} less than hiring locally — so the budget for one local hire can often cover two, sometimes three, full-time people.\n\nJust curious — for your hiring, do you keep everything in-house, or do you ever work with outside partners?",
+   CA:"Hi {lead}, it's {me} from Outsource Accelerator — how are you today? (pause)\n\nGlad to hear it. I'll respect your time — this is a cold call. Could I take 30 seconds to share why I'm calling, and you decide if it's relevant? (pause)\n\nThank you. We're an outsourcing marketplace — we connect businesses like {company} with vetted offshore staffing partners, usually around {savings} below local hiring costs — in plain terms, the budget for one local hire can often cover two people.\n\nOut of curiosity — do you handle hiring all in-house, or do you work with outside partners for anything?",
+   UK:"Hello {lead}, it's {me} calling from Outsource Accelerator — hope your day's going well? (pause)\n\nLovely. I'll be honest with you, it's a cold call — so I'll be brief. Could I have thirty seconds to explain why I rang, and you can tell me if it's at all relevant? (pause)\n\nBrilliant, thank you. We're an outsourcing marketplace — we help businesses like {company} find vetted offshore staffing partners, and it typically works out around {savings} less than hiring locally — which often means the budget for one local hire could cover two, even three people.\n\nJust out of curiosity — how do you handle hiring at the moment? All in-house, or do you work with outside partners at all?",
+   AU:"Hi {lead}, it's {me} from Outsource Accelerator — how're you going? (pause)\n\nGood to hear. Look, I'll be upfront — it's a cold call, so I'll keep it quick. Mind if I take 30 seconds and you tell me if it's worth a chat? (pause)\n\nAppreciate it. We're a marketplace that connects businesses like {company} with vetted offshore staffing partners. Most roles land around {savings} under local hiring costs — so the money for one local hire can often cover two or three.\n\nJust curious — do you keep hiring all in-house, or do you use outside partners for anything?",
+   NZ:"Hi {lead} (or “Kia ora” if it comes naturally), it's {me} from Outsource Accelerator — how's your day going? (pause)\n\nGood stuff. I won't take much of your time — I'll be upfront, it's a cold call. Would you mind if I took 30 seconds to explain why I'm calling, and you can tell me if it's useful? (pause)\n\nThanks heaps. We help businesses like {company} find vetted offshore staff through partner firms — it often works out around {savings} less than hiring locally — for some businesses, that's one local salary covering two people. Totally fine if it's not a fit.\n\nHow do you usually handle hiring — in-house, or with outside partners?"},
+  tip:"Smile before you dial and PAUSE after each question. The closing question is deliberately open (in-house OR partners) — it can't be answered with a flat 'no', and both answers lead somewhere. Ask it, then stop talking.",
+  why:"Gong: 'How have you been?' 6.6× baseline; stating a reason 2.1×. UK/NZ: owning that it's a cold call + offering an exit lowers the guard. Notice: NO voucher and NO roles in the opener — SP team directive and dispute data.",
+  never:"Don't open with the $ voucher (a lead 'motivated by the voucher' fails QA). Don't name roles before they do. Don't say 'Did I catch you at a bad time?'.",
+  hooks:true,
+  floor:[["Vincent","“Feel free to cut me off if it's not in your wheelhouse.” — disarms the brush-off before it fires."],["Marc","“I know your time is limited, so I'll make this quick and straightforward — is that okay?”"],["Pedro","“Mind if I grab just half a minute, and you let me know if this is relevant?”"]],
+  branches:[{t:"Engaged / answers",go:"discover",k:"go"},{t:"Who is this? / What's this about?",r:"who"},{t:"Not interested",r:"notint"},{t:"Busy / driving / in a meeting",r:"busy"},{t:"Send me an email",r:"email"},{t:"Remove me / Do not call",r:"dnc",k:"stop"},{t:"Gatekeeper / call screener",r:"gate"}]},
+
+ {id:"discover",n:3,title:"Discover",goal:"Let THEM name the work. Probe tasks, not titles. You're looking for computer-based work that's stretching the team.",
+  qs:[
+   ["Team","Roughly how many people on the team at the moment?  (need "+CONFIG.minEmployees+"+ active employees)"],
+   ["Base","Where's the team based today, and how are you handling hiring right now?"],
+   ["Stretch","Which part of the business is stretching the team the most at the moment?"],
+   ["Roles","What roles are you looking to fill, or expecting to hire for in the next couple of months?"],
+   ["One seat","If you did put one person offshore, what would you have them start on?"],
+   ["Tasks","Walk me through a typical day for that person — what's done on a computer, and what has to be physically on-site?"],
+   ["After-hours","Who picks up the admin, quotes or follow-ups when everyone's flat out?"]],
+  say:{default:"(Pick 2–3 questions, not all. Mirror their words back: “So it's mainly the quoting and the order updates that pile up?”)"},
+  tip:"Explore their work BEFORE suggesting anything. If they can't name a role, ask about tasks that pile up — the role is usually hiding there. Never name a role for them first.",
+  why:"SP team: partners offer different roles — when we suggest roles first, we book things partners don't provide and DCs get rejected. Disputes also show 'roles named by the SDR' get thrown out.",
+  never:"Recruitment firm? → “Is that for your own team, or a role you're filling for a client?” Client roles = NOT a lead. Offshore office already? → “Is that your own office or through an outsourcing firm?” (don't DQ on the spot).",
+  floor:[["Summer","“If you did put one person offshore, what role would you start with?” — lets them name it."],["Jesley","“We're not trying to fill a seat this week — we'd just love to be a resource for you.”"],["Pedro","“Do you have team members working remotely already?” — a natural bridge to offshore."]],
+  branches:[{t:"Named computer-based work",go:"qualify",k:"go"},{t:"Not hiring right now",r:"nothiring"},{t:"Have a recruiter / agency",r:"recruiter"},{t:"Already offshore",r:"alreadyoff"},{t:"Small team",r:"small"},{t:"It's all on-site work",r:"onsite"},{t:"We use AI for that",r:"ai"},{t:"That role isn't mine",r:"notmine"}]},
+
+ {id:"qualify",n:4,title:"Qualify (their words)",goal:"Four criteria + decision-maker, each answered IN THE LEAD'S OWN WORDS. Fill the panel on the right as you go.",
+  qs:[
+   ["Full-time","Would you see that as a full-time seat — 30 to 40 hours a week — or something lighter than that?"],
+   ["Timeline","And if the right person came along, when would you ideally want them starting?   ← OPEN. Never offer “1–2 months”."],
+   ["Offshore","Would you be open to that person being offshore — wherever the best fit is?   ← need a spoken YES."],
+   ["Decision","Are you the one who'd sign off on this, or is someone else involved?"],
+   ["Headcount","And just so I brief them properly — one person to start, or a small team?"]],
+  say:{default:"(Ask conversationally, one at a time. Write down exactly what they say in the panel → the recap uses it.)"},
+  tip:"If timeline is > 2 months, or funding is pending past 2 months: don't convert it — set a DATED callback. If they say part-time, ask WHY before you rebut (budget vs workload vs just exploring).",
+  why:"20 of 26 SP disputes since Aug 26 were upheld. The repeat pattern (HOPLA, Sterling, Pandr): the 1–2 month answer came from the SDR's recap, not the lead. A coached 'yes' books — and then disputes or no-shows.",
+  never:"Don't book: commission-only roles, project/ad-hoc, part-time that stays part-time, a non-decision-maker who pointed you to someone else, or a lead whose company policy may block non-local tax residents until they've confirmed.",
+  floor:[["Jenny","“Can you give me a window — between nine and eleven? …and that's New Zealand time, right?”"],["Pedro","“If they found the perfect candidate and the pricing made sense, would you be bringing them on…?” — ok as a follow-up, but get THEIR timeframe first."]],
+  branches:[{t:"All four in their words",go:"position",k:"go"},{t:"Part-time only",r:"parttime"},{t:"Timeline 3+ months",r:"later"},{t:"Funding pending",r:"funding"},{t:"Not the decision-maker",r:"notdm"},{t:"Prefers local",r:"local"},{t:"Time-zone worry",r:"tz"},{t:"Quality / English worry",r:"quality"},{t:"Tried it before",r:"tried"}]},
+
+ {id:"position",n:5,title:"Position the meeting",goal:"Say exactly what OA is and what the DC is — so nobody arrives expecting CVs from us.",
+  say:{
+   default:"Perfect — that's exactly the kind of role our partners handle, so I'll skip the sales pitch.\n\nQuick heads-up on how it works, so there are no surprises: we're a marketplace, not a recruitment agency. I'll match you with two of our {partners} vetted offshore staffing partners who specialise in {role}. The partner legally employs, pays and manages the person — you direct the work and get the output.\n\nOn two short back-to-back calls, {meeting}, they'll understand your requirements, walk you through how the model works and what your options look like — so you get an apples-to-apples comparison in one sitting instead of chasing it yourself. No obligation either way, and as a thank-you for your time we send a {voucher} once you've attended both.",
+   UK:"Lovely — that's exactly the sort of role our partners handle, so I'll spare you the sales pitch.\n\nJust so there are no surprises: we're a marketplace rather than a recruitment agency. I'd match you with two of our {partners} vetted offshore staffing partners who specialise in {role}. The partner legally employs, pays and manages the person — you direct the work and get the output.\n\nIt's two short back-to-back calls, {meeting}, where they'll get to understand what you need, walk you through how the model works and what your options look like — a proper like-for-like comparison in one sitting. No obligation at all, and as a thank-you we send a {voucher} once you've attended both.",
+   AU:"Good stuff — that's right in our partners' wheelhouse, so I'll skip the pitch.\n\nQuick heads-up so there's no confusion: we're a marketplace, not a recruitment agency. I'll line you up with two of our {partners} vetted offshore staffing partners who specialise in {role}. The partner employs, pays and manages the person — you run the work.\n\nTwo short back-to-back calls, {meeting}, so you can compare apples with apples in one go. No obligation, and as a thanks we send a {voucher} once you've done both.",
+   NZ:"Sounds good — that's the kind of role our partners look after, so I won't give you a pitch.\n\nJust so it's clear: we're a marketplace, not a recruitment agency. I'd introduce you to two of our vetted offshore staffing partners who specialise in {role}. They employ, pay and look after the person — you direct the work.\n\nIt's two short back-to-back chats, {meeting}, to understand what you need and show you what your options look like. Totally no obligation — and as a thank-you there's a {voucher} once you've attended both."},
+  tip:"Say the two-meeting explainer BEFORE you ask for a time — it pre-empts 'why two meetings?'. Then go straight to the close. If they say “so you'll send me CVs?” correct it in the same breath (see rebuttal).",
+  why:"Ritch / Che corrections: the partner is the EMPLOYER, not a recruiter; don't promise CVs, candidates or firm pricing on the DC; don't say 'source partners' or 'thousands of companies'.",
+  never:"Don't say: 'sourcing partners', 'we'll find you great talent', 'they'll present candidate profiles and pricing on the call', 'our network of thousands of companies', 'world's leading' (AU/NZ especially).",
+  hooks:true,
+  floor:[["Jesley","“I'll match you with the top two that fit your industry and the role… on the call they'll go through how the team gets managed day to day and who owns performance and retention.”"],["Pedro","“It's a great way to benchmark your current spending against the global market.”"]],
+  branches:[{t:"Sounds good → book",go:"close",k:"go"},{t:"Why two meetings?",r:"two"},{t:"So you'll send me CVs?",r:"cvs"},{t:"How much does it cost?",r:"cost"},{t:"Need to think about it",r:"think"},{t:"Just interested in the voucher",r:"voucher"}]},
+
+ {id:"close",n:6,title:"Close & lock it in",goal:"Specific day + time in THEIR time zone, business email, accept the invite, and one reason to show up.",
+  say:{
+   default:"Let's find a slot. I've got {day1} or {day2} — would morning or afternoon suit you better? (pause)\n\nPerfect. So that's {weekday-slot} — your time, {tzname}. (confirm out loud)\n\nWhat's the best business email for the invite? (read it back letter by letter)\n\nAnd out of those two calls, what's the one thing you'd want to walk away knowing? (write it down — it goes to the partners)\n\nWhen the invite lands, could you hit 'accept' so the partners know you're coming? If anything changes, just reply to it and I'll rebook — no drama.",
+   UK:"Shall we find a slot? I've got {day1} or {day2} — would a morning or an afternoon suit you better? (pause)\n\nLovely. So that's {weekday-slot}, UK time. (confirm out loud)\n\nWhat's the best work email for the invite? (read it back)\n\nAnd from those two calls, what's the one thing you'd most like to come away knowing? (write it down)\n\nWhen the invite comes through, would you mind accepting it so the partners know you'll be there? And if anything changes, just reply and I'll sort a new time — no bother at all."},
+  tip:"Offer TWO specific days (Wed/Thu tend to beat Mon/Tue). Always say date + weekday + time + time zone. If they're driving / no calendar: propose a time, send the invite, and book a confirm call — flag it as show-risk.",
+  why:"SP show-rate complaints (e.g. 1 of 4 shows on one partner): partners now expect a 24h confirmation, a tracked 'accept', and a BDR who stays in touch until 1 hour before. 'What do you want to walk away knowing?' predicts attendance better than a yes.",
+  never:"Don't book when the right-panel verdict is red. Don't accept 'I'll try / I'll do my best' — pin a time. Don't use a personal email if a business one exists (explain why: partner invites).",
+  floor:[["Marc","“Normally, what time are you available so I can send the call online?” → then pin it."],["Jenny","“Are you a morning person or do you prefer afternoon? …Between ten to twelve, New Zealand time, right?”"]],
+  branches:[{t:"Booked ✔",go:"log",k:"go",book:true},{t:"Wants to check calendar",r:"calendar"},{t:"Only one meeting",r:"two"},{t:"Callback instead",r:"later"}]},
+
+ {id:"log",n:7,title:"Recap & log",goal:"Read the recap in THEIR words, get an audible yes, then log only what they said.",
+  say:{default:"(The recap and HubSpot note are auto-built on the RECAP & LOG tab from what you typed in the panel.)\n\n“Just to recap so I've got it right: …” → wait for a clear spoken yes — a nod isn't on the recording.\n\nThen: {bye}"},
+  tip:"The recap is what QA and the partner read. If a criterion is missing from the lead's own words, go back and ask it — don't fill the gap yourself.",
+  why:"HubSpot disputes: notes that included things the lead never said (company size, timing, budget). Record ONLY lead-stated facts. Treat any 'Cancel or requalify' QA flag as a STOP until requalified.",
+  never:"Don't recap a timeline they didn't say. Don't round 'three months' down to 'one to two'.",
+  branches:[{t:"Open Recap & Log tab",tab:"log",k:"go"},{t:"Next lead ↺",reset:true}]}
+];
+
+// ============================== REBUTTALS ================================
+// cat: open | discover | qualify | close | compliance
+const REBUTTALS = [
+ {id:"who",cat:"open",title:"Who is this? / What's this about?",trig:"who's this · where are you calling from · what's this regarding",
+  say:"Fair question — it's {me} at Outsource Accelerator. We're a marketplace for offshore staffing — think recruitment, but offshore, and the partner firm actually employs the person.\n\nI'm calling to see whether {company} ever brings on roles that could be done remotely. Can I ask you one quick question?",
+  tip:"Name, reason, one question — in one breath, then stop. If they genuinely can't hear/understand you, slow down and re-introduce — that's the line, not an objection.",
+  floor:"Marc booked with: “World's leading marketplace for offshore staffing — think recruitment, but offshore.” (In AU/NZ drop 'world's leading'.)"},
+ {id:"notint",cat:"open",title:"Not interested (early)",trig:"not interested · no thanks · we're fine",
+  say:"{ack} Before I let you go — is it more that your hiring is sorted, or that it's just not a priority right now?\n\n(if sorted) Totally understand. Most people I speak to aren't looking to change anything — they just like to know their benchmark. How's the in-house team going for finding good people?\n(if not a priority) When do you think it might be back on the radar? I'm happy to give you a quick call then.",
+  tip:"Ask ONE diagnostic question, then respect the answer. If it's a second clear no, exit warmly — pushing after a clear no is what UK/NZ buyers (and SP partners) punish.",
+  floor:"Marc: “Is it okay to touch base end of Q1 next year? Things could happen — you might expand by then.”"},
+ {id:"busy",cat:"open",title:"Busy · in a meeting · driving",trig:"I'm driving · in a meeting · bad time · call me back",
+  say:"{ack} I'll be quick — or would it be better if I call you back at a set time?\n\n(if driving) No worries — focus on the road. When are you back at your desk? I'll call you {day1} at [time] — does that work?\n\n(if 'go ahead, quickly') Thanks — one question and you tell me if it's relevant: do you ever hire for roles that could be done remotely?",
+  tip:"Busy is one of the objections that CONVERTS — treat the callback like an appointment (day + time). Never book a DC while they're driving without a calendar — that's how no-shows happen.",
+  floor:"Gian: “Sure, sure — focus on driving. I'll be quick.”"},
+ {id:"email",cat:"open",title:"Just send me an email",trig:"send me an email · send some info · email me",
+  say:"Happy to. So I send the right thing — which would be more useful: the roles businesses like yours usually offshore, or how the costs compare to hiring locally?\n\n(then) Honestly, emails tend to get buried — would it help if I also pop a short 15-minute slot in the calendar alongside it? One click to decline if it's not useful.",
+  tip:"Say YES to the email, then ask one qualifying question — it turns the brush-off into discovery. You still need the 4 criteria before a DC counts; if you can't get them, send the email + set a dated callback.",
+  floor:"Jenny: “I can send an email proposal — but normally when we do, we don't hear back. How about I also send a calendar invite for a 15-minute discovery call, at your most convenient time?”"},
+ {id:"gate",cat:"open",title:"Gatekeeper / AI call screener",trig:"say your name and reason for calling · who's calling · is she expecting you",
+  say:"(Screener) “{me} from Outsource Accelerator — business enquiry about {company} for {lead}, please.”\n\n(Receptionist) “Hi, it's {me} from Outsource Accelerator — I'm hoping to have a quick word with {lead} about hiring for {company}. Is she/he around?”",
+  tip:"Short, confident, sound like you're expected. Don't pitch the gatekeeper. If blocked, ask: “Who looks after hiring or operations there?”",
+  floor:"Vincent through a screener: “Vince — business inquiry about New Colony for Chris Badger, please.”"},
+ {id:"dnc",cat:"compliance",title:"Remove me / Do not call / This is illegal",trig:"take me off · stop calling · DNC · TPS",
+  say:"Of course — I'll remove you right now. Sorry for the interruption, {lead}. Have a good day.",
+  tip:"No rebuttal, not even a soft one. Suppress the record immediately and log it. UK: TPS/CTPS rules — never argue about where the number came from.",
+  floor:""},
+ {id:"source",cat:"compliance",title:"Where did you get my number?",trig:"how did you get my number · is this a scam",
+  say:"Fair question — it's from business contact data for {company}. If you'd rather not hear from us, I'll remove you straight away. Otherwise, it'll take 30 seconds to tell you why I called.",
+  tip:"Be transparent, offer removal. Honesty is the rebuttal.",floor:""},
+ {id:"nothiring",cat:"discover",title:"We're not hiring right now",trig:"not hiring · no plans · not looking",
+  say:"{ack} I'm not trying to fill a seat this week — I'd just like to be a resource for you.\n\nOut of curiosity, when you DO add people, what kind of roles usually come first? (pause)\n\nAnd realistically, when might that be?",
+  tip:"Probe for a role and THEIR timeline. If it's within ~2 months and they name it → qualify. If later → dated callback. Never manufacture a role or a timeline.",
+  floor:"Jesley: “We understand you might not be hiring this exact minute, and we're not trying to fill a seat this week.” · Marc: “Whenever you hire, what roles do you normally prioritise?”"},
+ {id:"recruiter",cat:"discover",title:"We use a recruiter / have an agency / sole agreement",trig:"we have a recruiter · agency · sole agreement · in-house talent team",
+  say:"Makes sense — sounds like it's working for you. We're not here to replace anyone; most people just like a benchmark of what the same role costs offshore.\n\nWhen does that arrangement next come up for review — or when would you next look at options?",
+  tip:"Don't knock their recruiter. If there's a real near-term need for an offshore-suitable role, qualify it. Otherwise lock a dated callback near their review date.",
+  floor:"Vincent: “Since it's a discovery call, we're not aiming to change your existing process — we'd just like to be someone you can consider.”"},
+ {id:"alreadyoff",cat:"discover",title:"We already have an offshore team",trig:"we already have people offshore · we have an office in Manila/India",
+  say:"Oh nice — so you already know the model works. Is that through your own office, or through an outsourcing firm? (pause)\n\nAnd are you happy with BOTH the quality and the cost, or is there a bit of room on either?",
+  tip:"Don't disqualify. 'Happy with both?' is a double gate — most people are happy with one, not both. Is there another role on the horizon?",
+  floor:"Summer: “Which region? …That's wonderful — you already have the idea how the model works.”"},
+ {id:"small",cat:"discover",title:"We're only a small team",trig:"we're small · just a few of us · one-man band",
+  say:"Actually smaller teams often get the most out of it — one good offshore hire can take the busywork off you.\n\nRoughly how many of you are there at the moment?\n\n(3+ active) That's plenty — what's the work that keeps piling up?\n(1–2 / solo) Totally get it — honestly it may be a bit early. Shall I check back in a few months?",
+  tip:"Need "+CONFIG.minEmployees+"+ active employees (full- or part-time) to book. Below that → nurture, don't force it.",floor:""},
+ {id:"onsite",cat:"discover",title:"It's all on-site / hands-on work",trig:"on the tools · on-site · physical work",
+  say:"Got it — the on-site work definitely stays local. Out of curiosity, who handles the computer-side of things — quotes, scheduling, invoicing, follow-ups, the admin after hours?",
+  tip:"Probe the tasks behind the role. If there's a genuinely computer-based need, qualify that. If everything is physical, be honest that it can't be outsourced and exit — that honesty is what keeps SP trust.",
+  floor:"Marc: “The one you mentioned needs to be done on-site — that cannot be outsourced, I'll be honest with you on that. But I looked at your website…”"},
+ {id:"ai",cat:"discover",title:"We use AI for that",trig:"AI does that · we use ChatGPT/automation",
+  say:"Smart move. Most of our clients use AI too — they still keep a person to check the edge cases and handle the relationships, and our partners' people are skilled in those AI tools. Would it be worth seeing how others combine both?",
+  tip:"Yes-AND the AI. Never argue against it.",floor:"Marc booked with this framing."},
+ {id:"notmine",cat:"discover",title:"That role isn't mine / wrong person",trig:"I don't handle hiring · not my department",
+  say:"Ah, that's my mistake — thanks for putting me straight. Who'd be the right person for that? (pause) Or even just which office it sits with, and I'll find them.\n\n(only if they're still chatting) And what does your side of the business look after?",
+  tip:"Own it in three words, get the name, don't pitch. Log it as wrong contact, not 'not interested'.",floor:""},
+ {id:"parttime",cat:"qualify",title:"Part-time only",trig:"part-time · a few hours · project basis",
+  say:"Sure, that's fair — can I ask what's making you lean part-time rather than full-time?\n\n(budget) Part-time looks cheaper up front, but offshore usually comes in around {savings} below local — so a full-time dedicated person often costs about what part-time help costs locally. If the numbers stacked up, would a full-time seat work?\n(workload) That's the most common reason. What tends to happen is the work finds the seat — once someone's there full-time you hand over the things you've been holding onto. Would that be closer to it?\n(exploring) Totally sensible way to start. Full-time just gives you consistency — one person who learns how you work. If it made sense, would you keep it full-time?",
+  tip:"Probe BEFORE you rebut. If it stays part-time / project / commission-only → it does NOT qualify. Don't force it; nurture.",floor:"Approved budget reframe from Summer: “You'd be paying for those hours anyway — and still saving.”"},
+ {id:"later",cat:"qualify",title:"Timeline 3+ months / call me in six months",trig:"next year · after Christmas · end of financial year · down the track",
+  say:"That's really useful, thanks. Worth knowing that terms, onboarding and getting the right person in place often takes a month or two on its own, so some people like to see options early.\n\nWould it be more useful to see the comparison now, or shall I give you a call nearer the time — say {callbackHint}?",
+  tip:"Log THEIR timeline in their words. If they choose 'later' → set a DATED callback (day + time) and keep your promise. Don't convert 'three months' into 'one to two'.",
+  floor:"Marc: “So maybe Tuesday the 12th, 12pm — just a quick call, not a meeting yet.”"},
+ {id:"funding",cat:"qualify",title:"Waiting on funding / budget approval",trig:"waiting on funding · seed round · budget approval",
+  say:"Makes sense. When are you expecting that to land? (pause)\n\n(within ~2 months) Got it — and once it lands, when would you want someone starting?\n(later / unknown) No worries — let's not jump the gun. I'll call you around [date] when you've got clarity.",
+  tip:"Don't ask about budget as a requirement — it's not a criterion. But if hiring depends on funding beyond ~2 months, nurture.",floor:""},
+ {id:"notdm",cat:"qualify",title:"Not the decision-maker / need to check with partner",trig:"my boss decides · check with my partner · Anneka handles staff",
+  say:"No worries at all, thanks for being upfront. Who's usually the one who'd sign off on something like this? (pause)\n\n(if they're involved) Easiest thing is to have them on the call with you — that way you both hear the same thing and nothing gets lost. Shall I add them to the invite?\n(if it's entirely someone else) Would you mind if I reached out to them directly and mentioned we spoke?",
+  tip:"If they point you to someone else, reach and qualify THAT person before booking. Copying them on the invite is not enough.",floor:"Sterling dispute (Nov): lead said 'Anneka is in charge of staff' → meeting booked without her → upheld dispute, 2 DCs lost."},
+ {id:"local",cat:"qualify",title:"Prefer local / unsure about offshore",trig:"prefer local · Aussie only · want someone here",
+  say:"{ack} Most people feel that way until they actually see it. Every partner is vetted, and you'd see real people before committing to anyone — you're never hiring blind. A lot of them work almost entirely with US, UK and Aussie businesses, so English at work is the norm.\n\nWould it be worth just seeing the options side by side before you decide?",
+  tip:"You need a spoken 'yes, open to offshore'. A hard 'must be local / tax-resident here' = don't book. Don't raise country restrictions yourself — but if they raise one, capture it.",floor:""},
+ {id:"tz",cat:"qualify",title:"Time zones",trig:"time difference · they'd be asleep",
+  say:"Fair point. Most partners set their teams up to work your business hours — a lot of staff actually prefer it. Is this role constant back-and-forth during the day, or more task-based?",
+  tip:"Diagnose first: real-time vs task-based are different conversations.",floor:"Vincent: “We have partners in different places — essentially we can follow yours.”"},
+ {id:"quality",cat:"qualify",title:"Quality / English / communication",trig:"quality · accents · communication",
+  say:"Really common question. The partners screen properly — skills, references, communication — and you see people before you agree to anyone.\n\nWhat does 'quality' mean for this role for you — technical skill, communication, reliability? Once I know, I'll be straight with you about whether it's a fit.",
+  tip:"Let them define the standard. Don't default to 'Philippines' — you don't know which partner they'll be matched to yet.",floor:""},
+ {id:"tried",cat:"qualify",title:"Tried outsourcing before — bad experience",trig:"tried it · got burned · didn't work",
+  say:"I'm really glad you told me — that changes how I'd approach it. What went sideways — the people, the communication, the management side? (listen)\n\nThat's usually a sourcing problem — whoever was free instead of whoever was right. That's why you'd compare two vetted partners side by side before committing. Worth a look?",
+  tip:"Listen more than you talk. 'Tried before' = they've validated the concept.",floor:""},
+ {id:"two",cat:"close",title:"Why two meetings? / Just one please",trig:"why two · only have time for one",
+  say:"Good question — because we're a marketplace, not one agency. Each partner prices and runs the role a bit differently, so two back-to-back calls give you an apples-to-apples comparison in one sitting. It's meant to save you time.\n\n(if they insist) No problem — let's do one and keep it tight.",
+  tip:"Don't lose the booking over it. If they insist on one, accommodate.",floor:"Marc: lead only had time for one — he adjusted the slot and still booked."},
+ {id:"cvs",cat:"close",title:"So you'll send me CVs / shortlist people?",trig:"send CVs · shortlist · people on your books · notice period",
+  say:"Let me set that straight so there's no surprise later: we won't be sending CVs ourselves — we're a marketplace, not a recruitment agency. The providers you'll meet are the ones who recruit and shortlist. You brief them on the role, they present candidates, and you choose who you want to work with. What I do is make sure the providers in front of you are the right fit.\n\nDoes that match what you were expecting?",
+  tip:"Correct it in the SAME breath and confirm it landed. A silent nod created a stalled deal and an SP escalation.",floor:"From Ritch's floor advisory — use these words."},
+ {id:"cost",cat:"close",title:"How much does it cost?",trig:"how much · what's the rate · pricing",
+  say:"Honest answer: the partners price against your exact requirements, so I won't guess and give you a wrong number. As a market guide, most roles come in around {savings} below local hiring. Getting the real figure for {role} is exactly what the call's for — fair enough?",
+  tip:"Never quote a rate or a partner price — a number you say becomes the anchor the partner has to fight.",floor:""},
+ {id:"think",cat:"close",title:"I need to think about it",trig:"let me think · I'll get back to you",
+  say:"Of course. Can I ask what you'd want to think through — timing, fit, or something else? (pause)\n\nThe partners answer most of that on the call itself — it's {meeting} of straight info, not a pitch. Would {day1} or {day2} work just to get it in front of you?",
+  tip:"Diagnose first. 'I'll try / I'll do my best' is a show-up flag — pin a day and time.",floor:""},
+ {id:"voucher",cat:"close",title:"Only interested in the voucher",trig:"so I just get the voucher? · what's the catch",
+  say:"(Keep it light) The voucher's just a thank-you for your time — the real value is seeing what {role} would look like offshore. Is that something you'd actually consider in the next couple of months?",
+  tip:"QA checks 'not motivated by the voucher'. If the only interest is the gift card, don't book.",floor:""},
+ {id:"calendar",cat:"close",title:"I need to check my calendar",trig:"don't have my calendar · let me check",
+  say:"No worries — let's pencil {day1} at [time] {tzname} and I'll send the invite now. If it clashes, just reply and I'll move it. I'll also give you a quick call tomorrow to confirm — does that work?",
+  tip:"Pencil + confirm call. Mark it show-risk in the panel.",floor:""},
+ {id:"policy",cat:"qualify",title:"Company policy — can we hire non-local tax residents?",trig:"UK payroll only · need to check policy · tax resident",
+  say:"That's a really important one to check — thanks for flagging it. Let's not book until you've confirmed, so nobody's time is wasted. When will you know? I'll call you then.",
+  tip:"SCP Design dispute (Nov): booked before the lead confirmed a payroll/tax-residency blocker → partner disputed. Policy unknown = don't book yet.",floor:""}
+];
+
+// ============================== DO & DON'T ===============================
+const DOS = [
+ ["Let the lead say the role, the hours and the timeline in their OWN words before you recap.","Pandr / HOPLA / Sterling disputes — the '1–2 months' came from the SDR, not the lead."],
+ ["Ask the timeline as an OPEN question: “When would you ideally want them starting?”","Oct 26 Process Alignment"],
+ ["Reach and qualify the real decision-maker (or get them on the call).","Sterling dispute on Ryan Kenyon — 2 DCs cancelled"],
+ ["Probe the tasks behind any on-site role — book only computer-based work.","Sterling dispute (production staff = on-site)"],
+ ["Recruitment firms: confirm the role is for THEIR OWN team, not a client.","Huddle recap Sept 30"],
+ ["Confirm "+CONFIG.minEmployees+"+ active employees (FT or PT) — verify, don't assume the list.","Oct 26 Process Alignment"],
+ ["Say: 'our BPO / offshore staffing partners' and 'the partner legally employs, pays and manages the team'.","Ritch: Corrections to how we describe OA"],
+ ["Correct the 'you'll send me CVs' assumption in the same breath, then check it landed.","Ritch floor advisory: We are the marketplace"],
+ ["Confirm date + weekday + time + time zone, and a business email.","Oct 26 Process Alignment"],
+ ["Stay in touch until 1h before the DC; confirm at 24h; tell the partner 1h before if the lead cancels.","Satellite Office show-rate escalation (Nov 11)"],
+ ["Treat a QA 'Cancel or requalify' flag as a STOP until requalified.","Sterling dispute — booked 14 min after first flag"],
+ ["Log only what the lead actually said in HubSpot.","Oct 26 Process Alignment — notes disputes"],
+ ["Set DATED callbacks for 'later' leads and keep your word.","UK EOFY deferrals (Huddle Sept 30)"]
+];
+const DONTS = [
+ ["Offer '1 to 2 months' for them to agree to, or round 3 months down.","Pandr disputes"],
+ ["Name or pitch roles before the lead tells you what they need.","Ritch: Call Flow Update (SP directive)"],
+ ["Say 'source partners' / 'sourcing partners' to a lead.","Ritch: Corrections"],
+ ["Promise candidate profiles, CVs or firm pricing on the DC.","Ritch: Corrections #3"],
+ ["Say 'thousands of outsourcing companies' or make big unverifiable claims.","Ritch: Corrections #4"],
+ ["Book part-time, project, ad-hoc or commission-only roles.","Oct 26 Process Alignment"],
+ ["Book when the lead flagged a policy/tax-residency blocker that isn't confirmed.","HOPLA dispute — SCP Design"],
+ ["Book client placements for recruitment firms.","Huddle recap Sept 30"],
+ ["Lead with the voucher or book someone who only wants the voucher.","QA criterion: not motivated by the voucher"],
+ ["Quote a rate or a partner's price.","Old script guidance — anchors the partner"],
+ ["Raise country/location restrictions yourself (but capture them if the lead does).","Ritch reply to Stefanie — Sterling"],
+ ["Push after a clear second 'no'.","UK & NZ norms; SP trust"],
+ ["Fake an accent or force slang — use regional words only where natural.","Authenticity beats imitation"]
+];
+const SAY_NOT = [
+ ["Our BPO partners / our offshore staffing partners","Source partners / sourcing partners"],
+ ["The partner legally employs, pays and manages the team. You direct the work.","The partner sources and manages offshore professionals for you."],
+ ["They'll understand your requirements, walk you through the model and your options.","They'll present candidate profiles and give you pricing on the call."],
+ ["I'll match you with two vetted partners who specialise in this role.","Our network includes thousands of outsourcing companies."],
+ ["When the provider presents candidates to you…","When we bring the right people in front of you…"],
+ ["Send it over so I can brief the providers before you meet them.","Send me the job description (and I'll find people)."],
+ ["When would you ideally want them starting?","So that's within one to two months, right?"]
+];
+const FLOOR_WINS = [
+ ["Marc","“Think recruitment, but offshore.” — the clearest one-line explanation on the floor."],
+ ["Vincent","“Feel free to cut me off if it's not in your wheelhouse.”"],
+ ["Summer","“This meeting helps you build a proactive talent pipeline — you'll know what's out there before you actually need them.”"],
+ ["Jenny","“Emails get buried — I'll send it AND a 15-minute invite at your most convenient time.”"],
+ ["Pedro","“A great way to benchmark your current spending against the global market.”"],
+ ["Jesley","“We're not trying to fill a seat this week — we'd love to be a resource for you.”"]
+];
+
+// ============================== ATTENTION HOOKS ==========================
+// One hook per call. Say it, then ASK — a hook is a door, not a speech.
+const HOOKS = [
+ {id:"multiply",label:"The multiplier",when:"Right after the marketplace line, or when they say 'too expensive'",
+  say:{default:"Put simply, the budget you'd spend on one local hire can often cover two — sometimes three — full-time people offshore. What would you do with an extra pair of hands like that?",
+   UK:"Put simply, the budget for one local hire could often cover two, even three, full-time people offshore. What would an extra pair of hands like that free you up to do?",
+   AU:"Put simply — the money for one local hire can often cover two or three full-time people offshore. What would you do with the extra hands?",
+   NZ:"For a lot of businesses, one local salary ends up covering two people. Would that sort of thing be useful for you?"},
+  note:"Honest maths: {savings} less = roughly 2× (at 50%) to 3× (at 70%). Say 'two, sometimes three' — never a flat '3 for 1', and never promise identical experience."},
+ {id:"same",label:"Same job, different postcode",when:"When they think offshore = lower quality",
+  say:{default:"It's the same job, done by an experienced full-time person — the main difference is the postcode, and the salary that comes with it.",
+   UK:"It's the same job, done by an experienced, full-time person — really the only difference is the postcode, and the cost that comes with it.",
+   AU:"Same job, same hours, experienced person — just a different postcode, and a very different wage bill.",
+   NZ:"It's the same work done by an experienced, full-time person — just based somewhere with a lower cost of living."},
+  note:"Keep it about the role, not a guarantee of any candidate. The partners prove quality on the call."},
+ {id:"time",label:"Hours back",when:"Owners / managers drowning in admin",
+  say:{default:"Most owners I talk to aren't short of ideas — they're short of hours. If someone took the admin and follow-ups off your plate, what would you do with those 15–20 hours a week?",
+   UK:"Most people I speak to aren't short of ideas, they're short of hours. If someone took the admin off your plate, what would you do with an extra 15 or 20 hours a week?",
+   AU:"Most owners aren't short of ideas, they're short of hours. If the admin was off your plate, what would you do with an extra 15–20 hours a week?",
+   NZ:"A lot of owners tell me it's not ideas they're short of — it's hours. If the admin was taken care of, what would you put that time into?"},
+  note:"It's a question — let them paint the picture. Whatever they say becomes the 'why' in your recap."},
+ {id:"slow",label:"The slow-hire pain",when:"When they're hiring locally right now",
+  say:{default:"The average role now takes around two months to fill locally — and the work doesn't wait. How long has this one been open?",
+   UK:"Roles are taking around two months to fill on average at the moment — and the work doesn't wait in the meantime. How long has yours been open?",
+   AU:"On average a role's taking about two months to fill now — and the work piles up meanwhile. How long's yours been open?",
+   NZ:"Roles are taking a couple of months to fill on average — how's that been going for you?"},
+  note:"US benchmark: ~63.5 days to fill in 2025 (Employ / HR Dive). Use it as their PAIN only — never promise the partner will fill it faster."},
+ {id:"benchmark",label:"Know your number",when:"'We're fine' / 'not looking to change anything'",
+  say:{default:"Even if you never change a thing, it's worth knowing your number — what that same role would cost offshore. It's 15 minutes, and you keep the comparison either way.",
+   UK:"Even if you never change a thing, it's worth knowing your number — what that same role would cost offshore. Fifteen minutes, and the comparison's yours to keep.",
+   AU:"Even if you never change a thing, it's handy to know your number. Fifteen minutes and you keep the comparison either way.",
+   NZ:"No pressure to change anything — it's just useful to know what your options look like. Fifteen minutes, and you keep the info."},
+  note:"Low-commitment framing. Still needs the 4 criteria before it counts as a DC."},
+ {id:"peers",label:"Your peers are doing it",when:"Sceptical / 'is this a fad?'",
+  say:{default:"For what it's worth, around 80% of executives in Deloitte's latest outsourcing survey plan to keep or increase what they outsource — it's become pretty standard for growing businesses.",
+   UK:"For what it's worth, Deloitte's latest survey found around 80% of executives plan to keep or grow what they outsource — it's become fairly standard.",
+   AU:"For what it's worth, about 80% of execs in Deloitte's last survey plan to keep or grow their outsourcing — it's pretty standard now.",
+   NZ:"It's becoming fairly common — Deloitte's last survey had most executives planning to keep or grow their outsourcing."},
+  note:"Deloitte Global Outsourcing Survey 2024. Social proof, not a claim about OA. Skip it for AU/NZ if it feels like boasting."},
+ {id:"notreplace",label:"Add, don't replace",when:"They worry about their current team",
+  say:{default:"This isn't about replacing anyone — it's about giving your team someone to take the repetitive work, so they can focus on the stuff only they can do.",
+   UK:"It's not about replacing anyone — it's giving your team someone to take the repetitive bits, so they can get on with what only they can do.",
+   AU:"It's not about replacing anyone — it's taking the repetitive stuff off your team so they can focus on the real work.",
+   NZ:"It's not about replacing anyone — just taking some of the repetitive load off the team."},
+  note:"Great with managers and HR contacts who hear 'outsourcing' as a threat."}
+];
+
+// ================================ STATE ==================================
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const store = {
+  get(k, d){ try{ const v = localStorage.getItem("oaca2_"+k); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
+  set(k, v){ try{ localStorage.setItem("oaca2_"+k, JSON.stringify(v)); }catch(e){} }
+};
+const blankGate = () => ({size:"",recruit:"na",role:"",tasks:"",computer:false,ft:"",ftWhy:"",timeline:"",tlBucket:"",offshore:"",dm:"",dmName:"",qa:false,policy:false,voucherOnly:false,showRisk:false,date:"",time:"",email:"",walkAway:"",headcount:""});
+const S = {
+  region: store.get("region","AU"),
+  tz: store.get("tz",null),
+  f: store.get("fields",{me:"",lead:"",company:"",title:"",industry:""}),
+  gate: store.get("gate",blankGate()),
+  step: 0, done: new Set(), showHooks: store.get("showHooks",true)
+};
+if(!S.tz || !REGIONS[S.region].tzs.find(t=>t[0]===S.tz)) S.tz = REGIONS[S.region].tzs[0][0];
+const save = () => { store.set("region",S.region); store.set("tz",S.tz); store.set("fields",S.f); store.set("gate",S.gate); };
+
+// ================================ TIME ===================================
+function tzOffsetMin(tz, d=new Date()){
+  const p = Object.fromEntries(new Intl.DateTimeFormat("en-US",{timeZone:tz,hourCycle:"h23",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit",second:"2-digit"}).formatToParts(d).map(x=>[x.type,x.value]));
+  const asUTC = Date.UTC(+p.year, +p.month-1, +p.day, +p.hour % 24, +p.minute, +p.second);
+  return Math.round((asUTC - d.getTime())/60000);
+}
+function localParts(tz, d=new Date()){
+  const p = Object.fromEntries(new Intl.DateTimeFormat("en-US",{timeZone:tz,hourCycle:"h23",weekday:"short",year:"numeric",month:"2-digit",day:"2-digit",hour:"2-digit",minute:"2-digit"}).formatToParts(d).map(x=>[x.type,x.value]));
+  return {y:+p.year,m:+p.month,d:+p.day,h:+p.hour%24,min:+p.minute,wd:p.weekday};
+}
+const fmtTime = (tz,d=new Date()) => new Intl.DateTimeFormat("en-AU",{timeZone:tz,hour:"numeric",minute:"2-digit",hour12:true}).format(d).toLowerCase();
+const tzLabel = () => (REGIONS[S.region].tzs.find(t=>t[0]===S.tz)||["",""])[1].replace(/\s*\(([^)]*)\)/," · $1");
+const art = w => /^[aeiou]/i.test(w||"") ? "an" : "a";
+// lead-local wall time today -> Date
+function leadLocalToDate(h, m){
+  const now = new Date(); const lp = localParts(S.tz, now);
+  const guess = Date.UTC(lp.y, lp.m-1, lp.d, h, m) - tzOffsetMin(S.tz, now)*60000;
+  return new Date(guess);
+}
+function callWindow(){
+  const lp = localParts(S.tz); const t = lp.h*60+lp.min;
+  if(lp.wd==="Sat"||lp.wd==="Sun") return ["bad","WEEKEND — don't dial"];
+  if(t < 7*60+30 || t >= 18*60) return ["bad","OUTSIDE HOURS"];
+  if(t >= 12*60 && t < 13*60+30) return ["ok","LUNCH — lower pickup"];
+  if(lp.wd==="Fri" && t >= 15*60) return ["ok","FRIDAY ARVO — light"];
+  if((t>=9*60 && t<11*60+30) || (t>=13*60+30 && t<16*60+30)) return ["good","PRIME WINDOW"];
+  return ["ok","FAIR WINDOW"];
+}
+function greeting(){ const h = localParts(S.tz).h; return h<12 ? "morning" : h<17 ? "afternoon" : "evening"; }
+function nextDays(){
+  const out = []; const now = new Date();
+  for(let i=1;i<=9;i++){
+    const d = new Date(now.getTime()+i*864e5);
+    const wd = new Intl.DateTimeFormat("en-GB",{timeZone:S.tz,weekday:"long"}).format(d);
+    if(wd==="Saturday"||wd==="Sunday") continue;
+    out.push({d, wd, label:new Intl.DateTimeFormat("en-GB",{timeZone:S.tz,weekday:"long",day:"numeric",month:"short"}).format(d)});
+  }
+  const pref = out.filter(x=>["Tuesday","Wednesday","Thursday"].includes(x.wd)).slice(0,2);
+  const pick = pref.length===2 ? pref : out.slice(0,2);
+  return pick.sort((a,b)=>a.d-b.d);
+}
+
+// ============================== TOKENS ===================================
+function tokens(){
+  const g = S.gate, R = REGIONS[S.region], nd = nextDays();
+  let slot = "";
+  if(g.date){
+    const [y,m,d] = g.date.split("-").map(Number);
+    const dt = new Date(Date.UTC(y,m-1,d,12));
+    slot = new Intl.DateTimeFormat("en-GB",{weekday:"long",day:"numeric",month:"long",timeZone:"UTC"}).format(dt) + (g.time ? " at "+fmt12(g.time) : "");
+  }
+  const t = {
+    me:S.f.me, lead:S.f.lead, company:S.f.company, title:S.f.title, industry:S.f.industry,
+    role: g.role || "", savings:CONFIG.savings, partners:CONFIG.partners, meeting:CONFIG.meeting,
+    voucher: CONFIG.voucher[S.region], ack:R.ack, thanks:R.thanks,
+    day1: nd[0]?nd[0].label:"", day2: nd[1]?nd[1].label:"", tzname: tzLabel(), "weekday-slot": slot, callbackHint:"[day + time]"
+  };
+  t.bye = R.bye.replace("{lead}", t.lead || "there");
+  return t;
+}
+function fmt12(hhmm){ const [h,m]=hhmm.split(":").map(Number); const ap=h>=12?"pm":"am"; return ((h%12)||12)+(m?":"+String(m).padStart(2,"0"):"")+ap; }
+const fallback = {me:"[your name]",lead:"[name]",company:"[company]",title:"[title]",industry:"[industry]",role:"that role","weekday-slot":"[day, date at time]"};
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function render(text){
+  const t = tokens();
+  let h = esc(text);
+  h = h.replace(/\{([\w-]+)\}/g,(m,k)=>{
+    const v = t[k];
+    if(v) return `<span class="tok">${esc(v)}</span>`;
+    return `<span class="tok empty">${esc(fallback[k]||"["+k+"]")}</span>`;
+  });
+  h = h.replace(/\(([^)]{2,160})\)/g,'<span class="p">($1)</span>');
+  return h;
+}
+function plain(text){
+  const t = tokens();
+  return text.replace(/\{([\w-]+)\}/g,(m,k)=>t[k]||fallback[k]||"["+k+"]");
+}
+const pickSay = say => !say ? "" : (say[S.region] || say.default || say.US || "");
+
+// ============================== HEADER/SETUP =============================
+function renderRegionBtns(){
+  $("#regionBtns").innerHTML = Object.entries(REGIONS).map(([k,r])=>`<button data-r="${k}" class="${k===S.region?'on':''}" title="${r.name}"><span class="f">${r.flag}</span>${k}</button>`).join("");
+  $$("#regionBtns button").forEach(b=>b.onclick=()=>{ S.region=b.dataset.r; S.tz=REGIONS[S.region].tzs[0][0]; save(); refreshAll(); toast(REGIONS[S.region].flag+" Switched to "+REGIONS[S.region].name+" style"); });
+  $("#tzSel").innerHTML = REGIONS[S.region].tzs.map(([v,l])=>`<option value="${v}" ${v===S.tz?'selected':''}>${l}</option>`).join("");
+}
+$("#tzSel").onchange = e => { S.tz = e.target.value; save(); refreshAll(); };
+["me","lead","company","title","industry"].forEach(k=>{
+  const el = $("#f_"+k); el.value = S.f[k]||"";
+  el.oninput = () => { S.f[k]=el.value; if(k==="me") store.set("me",el.value); save(); renderStep(); renderLog(); };
+});
+if(!S.f.me) { S.f.me = store.get("me",""); $("#f_me").value = S.f.me; }
+$("#newLead").onclick = resetLead;
+function resetLead(){
+  const me = S.f.me; S.f = {me,lead:"",company:"",title:"",industry:""}; S.gate = blankGate(); S.step=0; S.done=new Set();
+  ["lead","company","title","industry"].forEach(k=>$("#f_"+k).value=""); save(); refreshAll(); toast("Fresh lead — go get it 💪");
+}
+function tick(){
+  $("#leadTime").textContent = fmtTime(S.tz);
+  $("#leadTz").textContent = REGIONS[S.region].flag;
+  $("#phtTime").textContent = fmtTime("Asia/Manila");
+  const [cls, lab] = callWindow(); const w = $("#winBadge"); w.className = "win "+cls; w.textContent = lab;
+}
+setInterval(tick, 15000);
+
+// ============================== STEPS ====================================
+function renderSteps(){
+  $("#steps").innerHTML = STEPS.map((s,i)=>`<button data-i="${i}" class="${i===S.step?'on':''} ${S.done.has(i)&&i!==S.step?'done':''}"><span class="n">${S.done.has(i)&&i!==S.step?'✓':s.n}</span>${s.title}</button>`).join("");
+  $$("#steps button").forEach(b=>b.onclick=()=>go(+b.dataset.i));
+  const R = REGIONS[S.region];
+  $("#styleCard").innerHTML = `<h3>${R.flag} ${R.name} style</h3><div style="font-weight:700;margin-bottom:4px">${R.vibe}</div><div class="mini" style="margin-bottom:6px">${R.pace}</div>
+   <div>${R.use.map(u=>`<span class="tag">${esc(u)}</span>`).join("")}</div><div style="margin-top:4px">${R.avoid.map(u=>`<span class="tag no">${esc(u)}</span>`).join("")}</div>
+   <div class="mini" style="margin-top:8px">It's ${greeting()} for them → “Good ${greeting()}”.</div>`;
+}
+function go(i){ S.done.add(S.step); S.step = Math.max(0,Math.min(STEPS.length-1,i)); renderSteps(); renderStep(); window.scrollTo({top:0,behavior:"smooth"}); }
+function renderStep(){
+  const s = STEPS[S.step]; let h = `<div class="stepHead"><span class="badge">Step ${s.n} of ${STEPS.length}</span><h2>${s.title}</h2></div><p class="goal">${s.goal}</p>`;
+  if(s.checklist) h += `<ul class="qlist">${s.checklist.map(c=>`<li><input type="checkbox"> ${esc(c)}</li>`).join("")}</ul>`;
+  const say = pickSay(s.say);
+  if(say) h += `<div class="sayLabel"><span>Say it (${S.region} version)</span><button class="copy" id="copySay">Copy</button></div><div class="say">${render(say)}</div>`;
+  if(s.qs) h += `<div class="sayLabel"><span>Questions</span></div><ul class="qlist">${s.qs.map(([k,q])=>`<li><span class="k">${k}</span><span>${render(q)}</span></li>`).join("")}</ul>`;
+  if(s.hooks) h += `<div class="sayLabel"><span>🎣 Attention hooks — pick ONE, then ask a question</span><button class="copy" id="toggleHooks">${S.showHooks?'Hide':'Show'}</button></div>` + (S.showHooks ? HOOKS.map(k=>`<div class="floor" style="border-color:#f3b6d3"><b>${esc(k.label)}</b> <span class="mini">· ${esc(k.when)}</span><div style="font-size:15px;margin:4px 0">${render(pickSay(k.say))}</div><div class="mini">${render(k.note)}</div><button class="copy" data-hook="${k.id}">Copy</button></div>`).join("") : "");
+  if(s.tip) h += `<div class="tip"><b>Coach tip · </b>${esc(s.tip)}</div>`;
+  if(s.why) h += `<div class="why"><b>Why · </b>${esc(s.why)}</div>`;
+  if(s.never) h += `<div class="never"><b>Never · </b>${esc(s.never)}</div>`;
+  if(s.floor) h += s.floor.map(([who,l])=>`<div class="floor"><b>Floor-tested · ${who}:</b> ${esc(l)}</div>`).join("");
+  h += `<div class="branches">${s.branches.map((b,i)=>`<button data-b="${i}" class="${b.k==='go'?'go':b.k==='stop'?'stop':b.r?'obj':''}">${b.r?'⚡ ':''}${esc(b.t)}</button>`).join("")}</div>
+   <div class="mini" style="margin-top:10px"><span class="kbd">←</span> <span class="kbd">→</span> move steps · <span class="kbd">/</span> search rebuttals · <span class="kbd">Esc</span> close</div>`;
+  $("#stepCard").innerHTML = h;
+  const cs = $("#copySay"); if(cs) cs.onclick = () => copyText(plain(say));
+  const th = $("#toggleHooks"); if(th) th.onclick = () => { S.showHooks = !S.showHooks; store.set("showHooks",S.showHooks); renderStep(); };
+  $$("[data-hook]").forEach(b=>b.onclick=()=>copyText(plain(pickSay(HOOKS.find(k=>k.id===b.dataset.hook).say))));
+  $$("#stepCard .branches button").forEach(btn=>btn.onclick=()=>{
+    const b = s.branches[+btn.dataset.b];
+    if(b.r) return openRebuttal(b.r);
+    if(b.tab) return showTab(b.tab);
+    if(b.reset) return resetLead();
+    if(b.book){ const v = verdict(); if(v.cls!=="book"){ toast("Panel says "+v.big+" — fix it before you book"); return; } bump("booked"); celebrate(); }
+    if(b.go) go(STEPS.findIndex(x=>x.id===b.go));
+  });
+}
+
+// ============================== REBUTTALS ================================
+function rebHTML(r, withBack){
+  return `<div class="cat">${r.cat}</div><h4 style="margin:2px 0 4px;font-size:16px">${esc(r.title)}</h4><div class="trig">Lead says: ${esc(r.trig)}</div>
+   <div class="say">${render(r.say)}</div>
+   <div class="tip"><b>Coach tip · </b>${esc(r.tip)}</div>${r.floor?`<div class="floor"><b>Floor-tested:</b> ${esc(r.floor)}</div>`:""}
+   <div class="branches"><button class="copy" data-copyreb="${r.id}">Copy line</button>${withBack?`<button class="go" id="backStep">↩ Back to ${STEPS[S.step].title}</button>`:""}</div>`;
+}
+function openRebuttal(id){
+  const r = REBUTTALS.find(x=>x.id===id); if(!r) return;
+  bump("objection",true);
+  $("#modal").innerHTML = `<button class="x" id="mx">✕</button>`+rebHTML(r,true);
+  $("#modalBg").classList.add("show");
+  $("#mx").onclick = closeModal; $("#backStep").onclick = closeModal;
+  $(`[data-copyreb="${id}"]`).onclick = ()=>copyText(plain(r.say));
+}
+function closeModal(){ $("#modalBg").classList.remove("show"); }
+$("#modalBg").onclick = e => { if(e.target.id==="modalBg") closeModal(); };
+function renderRebuttals(){
+  const q = ($("#rSearch").value||"").toLowerCase().trim();
+  const list = REBUTTALS.filter(r=>!q || (r.title+" "+r.trig+" "+r.say).toLowerCase().includes(q) || q.split(/\s+/).every(w=>(r.title+" "+r.trig).toLowerCase().includes(w)));
+  $("#rGrid").innerHTML = list.map(r=>`<div class="rcard">${rebHTML(r,false)}</div>`).join("") || `<div class="card">Nothing matched. Try one keyword, e.g. “email”, “price”, “recruiter”.</div>`;
+  list.forEach(r=>{ const b=$(`#rGrid [data-copyreb="${r.id}"]`); if(b) b.onclick=()=>copyText(plain(r.say)); });
+}
+$("#rSearch").oninput = renderRebuttals;
+
+// ============================== GATE / VERDICT ===========================
+function verdict(){
+  const g = S.gate, no = [], hold = [], miss = [];
+  const size = parseInt(g.size,10);
+  if(g.size==="") miss.push("Headcount (need "+CONFIG.minEmployees+"+)"); else if(size < CONFIG.minEmployees) no.push("Under "+CONFIG.minEmployees+" active employees → nurture");
+  if(g.recruit==="client") no.push("Recruitment firm hiring for a CLIENT → not a lead");
+  if(!g.role.trim()) miss.push("Role / tasks in their words");
+  if(g.role.trim() && !g.computer) hold.push("Confirm the tasks are computer-based (offshore-suitable)");
+  if(!g.ft) miss.push("Full-time 30–40h?");
+  else if(g.ft!=="ft") no.push("Not full-time ("+({pt:"part-time",project:"project/ad-hoc",comm:"commission-only"}[g.ft])+") → don't book");
+  if(!g.timeline.trim()) miss.push("Timeline in their words");
+  if(!g.tlBucket) miss.push("Timeline bucket");
+  else if(g.tlBucket==="later") hold.push("Timeline beyond ~2 months → DATED callback, not a DC");
+  else if(g.tlBucket==="funding") hold.push("Hiring depends on funding/approval → find the date, nurture");
+  if(!g.offshore) miss.push("Spoken yes to offshore");
+  else if(g.offshore==="no") no.push("Must be local / on-site → don't book");
+  else if(g.offshore==="maybe") hold.push("Offshore is only a 'maybe' → handle it, get a clear yes");
+  if(!g.dm) miss.push("Decision-maker?");
+  else if(g.dm==="other") no.push("Someone else decides and isn't reached → reach & qualify them first");
+  else if(g.dm==="joint" && !g.dmName.trim()) hold.push("Joint decision → add the other person's name to the invite");
+  if(g.qa) no.push("QA flagged 'Cancel or requalify' → STOP until requalified");
+  if(g.policy) no.push("Unconfirmed policy blocker (tax residency/payroll) → wait for confirmation");
+  if(g.voucherOnly) no.push("Only interested in the voucher → don't book");
+  if(no.length) return {cls:"no",big:"DON'T BOOK",items:no.concat(hold)};
+  if(hold.length) return {cls:"hold",big:"HOLD / NURTURE",items:hold.concat(miss.map(m=>"Still need: "+m))};
+  if(miss.length) return {cls:"hold",big:"KEEP QUALIFYING",items:miss.map(m=>"Still need: "+m)};
+  return {cls:"book",big:"✔ QUALIFIED — BOOK IT",items:[g.showRisk?"Show-risk flagged → confirm call within 24h":"Read the recap and get an audible yes", "Date + weekday + time + "+tzLabel()+" out loud"]};
+}
+function renderGate(){
+  const g = S.gate, v = verdict();
+  $("#gate").innerHTML = `<h3>Qualification gate</h3>
+   <div class="verdict ${v.cls}"><span class="big">${v.big}</span><ul>${v.items.map(i=>`<li>${esc(i)}</li>`).join("")}</ul></div>
+   <div class="row"><label>Active employees (their number)</label><input type="number" data-g="size" value="${esc(g.size)}" placeholder="e.g. 30"></div>
+   <div class="row"><label>Recruitment / staffing firm?</label><select data-g="recruit"><option value="na">Not a recruitment firm</option><option value="internal">Yes — role is for their OWN team</option><option value="client">Yes — role is for a CLIENT</option></select></div>
+   <div class="row"><label>Role — in their words</label><input type="text" data-g="role" value="${esc(g.role)}" placeholder="e.g. admin assistant"></div>
+   <div class="row"><label>Tasks they described</label><textarea data-g="tasks" placeholder="e.g. quotes, invoicing, order updates">${esc(g.tasks)}</textarea>
+     <span class="chk"><input type="checkbox" data-g="computer" ${g.computer?"checked":""}> Tasks are computer-based (can be done offshore)</span></div>
+   <div class="row"><label>Hours</label><select data-g="ft"><option value="">—</option><option value="ft">Full-time 30–40h (they said it)</option><option value="pt">Part-time</option><option value="project">Project / ad-hoc / output-based</option><option value="comm">Commission-only</option></select></div>
+   <div class="row"><label>Timeline — their exact words</label><input type="text" data-g="timeline" value="${esc(g.timeline)}" placeholder="e.g. “early January”"></div>
+   <div class="row"><select data-g="tlBucket"><option value="">Timeline bucket…</option><option value="now">Within ~2 months</option><option value="later">More than 2 months</option><option value="funding">Depends on funding / approval</option></select></div>
+   <div class="row"><label>Open to offshore?</label><select data-g="offshore"><option value="">—</option><option value="yes">Spoken YES</option><option value="maybe">Maybe / hesitant</option><option value="no">No — must be local</option></select></div>
+   <div class="row"><label>Decision-maker</label><select data-g="dm"><option value="">—</option><option value="yes">Yes — they sign off</option><option value="joint">Joint — other person joining the call</option><option value="other">Someone else — not reached yet</option></select>
+     <input type="text" data-g="dmName" value="${esc(g.dmName)}" placeholder="Other decision-maker's name (if any)"></div>
+   <div class="row"><label>Red flags</label>
+     <span class="chk"><input type="checkbox" data-g="qa" ${g.qa?"checked":""}> QA analysis flagged “Cancel or requalify”</span>
+     <span class="chk"><input type="checkbox" data-g="policy" ${g.policy?"checked":""}> Policy / tax-residency blocker not confirmed</span>
+     <span class="chk"><input type="checkbox" data-g="voucherOnly" ${g.voucherOnly?"checked":""}> Mainly interested in the voucher</span>
+     <span class="chk"><input type="checkbox" data-g="showRisk" ${g.showRisk?"checked":""}> Show-risk (driving / no calendar / “I'll try”)</span></div>
+   <div class="sep"></div>
+   <div class="row"><label>Booking — date &amp; time (${esc(tzLabel())})</label><div style="display:flex;gap:6px"><input type="date" data-g="date" value="${esc(g.date)}"><input type="time" data-g="time" value="${esc(g.time)}"></div></div>
+   <div class="row"><label>Business email</label><input type="text" data-g="email" value="${esc(g.email)}" placeholder="name@company.com"></div>
+   <div class="row"><label>What they want to walk away knowing</label><input type="text" data-g="walkAway" value="${esc(g.walkAway)}" placeholder="their words → goes to partners"></div>`;
+  $$("#gate [data-g]").forEach(el=>{
+    const k = el.dataset.g;
+    if(el.tagName==="SELECT") el.value = g[k];
+    const ev = (el.type==="checkbox"||el.tagName==="SELECT"||el.type==="date"||el.type==="time") ? "onchange" : "oninput";
+    el[ev] = () => { g[k] = el.type==="checkbox" ? el.checked : el.value; save(); updateVerdictOnly(); renderLog(); if(["role","date","time"].includes(k)) renderStep(); };
+  });
+}
+function updateVerdictOnly(){
+  const v = verdict(), box = $("#gate .verdict");
+  box.className = "verdict "+v.cls; box.innerHTML = `<span class="big">${v.big}</span><ul>${v.items.map(i=>`<li>${esc(i)}</li>`).join("")}</ul>`;
+}
+
+// ============================== RECAP & LOG ==============================
+function renderLog(){
+  const g = S.gate, t = tokens(), L = t.lead||"[name]";
+  const tl = g.timeline ? `“${g.timeline}”` : "[their timeline, in their words]";
+  const dmText = g.dm==="yes" ? "you're the one who signs off" : g.dm==="joint" ? `you'll decide together with ${g.dmName||"[name]"}, who'll join the call` : "[who signs off]";
+  const slot = t["weekday-slot"] || "[day, date at time]";
+  const recap = `Just to recap so I've got it right, ${L}:
+• You're looking at ${g.role?art(g.role)+" "+g.role:"[role]"}${g.tasks?` — mainly ${g.tasks}`:""}.
+• It'd be a full-time seat, around 30 to 40 hours a week.
+• Timing-wise, you said ${tl}.
+• You're open to that person being offshore.
+• And ${dmText}.
+
+So I've got you down for two back-to-back calls, ${CONFIG.meeting}, on ${slot} — ${tzLabel()}.
+The invite's going to ${g.email||"[business email]"}. Did I get all of that right?`;
+  $("#recapOut").textContent = recap;
+  const note = `DC BOOKED — ${t.company||"[company]"} · ${L}${t.title?" ("+t.title+")":""}
+Region/TZ: ${REGIONS[S.region].name} · ${tzLabel()}
+Headcount (lead-stated): ${g.size||"—"}${g.recruit==="internal"?" · Recruitment firm — INTERNAL role confirmed":""}
+Role (lead's words): ${g.role||"—"}
+Tasks (lead's words): ${g.tasks||"—"}
+Hours: ${({ft:"Full-time 30–40h (lead confirmed)",pt:"Part-time",project:"Project/ad-hoc",comm:"Commission-only"})[g.ft]||"—"}
+Timeline (lead's words): ${g.timeline?`"${g.timeline}"`:"—"}
+Open to offshore: ${({yes:"Yes (spoken)",maybe:"Maybe",no:"No"})[g.offshore]||"—"}
+Decision-maker: ${({yes:"Lead",joint:"Joint with "+(g.dmName||"?"),other:"Other — not reached"})[g.dm]||"—"}
+Wants to walk away knowing: ${g.walkAway?`"${g.walkAway}"`:"—"}
+DC: ${slot} ${tzLabel()} · Invite → ${g.email||"—"}
+Show-risk: ${g.showRisk?"YES — confirm call booked":"No"}
+QA verdict at booking: ${verdict().big}`;
+  $("#noteOut").textContent = note;
+  const R = S.region;
+  const hi = R==="UK" ? `Hi ${L},\n\nLovely to speak with you just now.` : R==="NZ" ? `Kia ora ${L},\n\nThanks for your time on the phone today.` : R==="AU" ? `Hi ${L},\n\nThanks for the chat just now.` : `Hi ${L},\n\nThanks for taking my call today.`;
+  const email = `Subject: your two short calls on ${slot||"[date]"}
+
+${hi} As promised, you'll have a calendar invite for ${slot||"[day, date at time]"} (${tzLabel()}) — two back-to-back calls, ${CONFIG.meeting}, with two vetted offshore staffing partners who specialise in ${g.role||"[role]"}.
+
+Quick reminder of how it works: we're a marketplace, not a recruitment agency. The partner legally employs, pays and manages the person; you direct the work. On the calls they'll get to understand your requirements and walk you through how the model works and what your options look like.${g.walkAway?`\n\nYou mentioned you'd like to come away knowing: "${g.walkAway}" — I've passed that on so they come prepared.`:""}
+
+Could you click "accept" on the invite so the partners know you're coming? If anything changes, just reply here and I'll find a new time.
+
+${R==="UK"?"Kind regards":R==="AU"||R==="NZ"?"Cheers":"Best"},
+${t.me||"[your name]"}
+Outsource Accelerator`;
+  $("#emailOut").textContent = email;
+  $("#showProtocol").innerHTML = `<ul class="qlist">
+   <li><span class="k">0–5 min</span><span>Send the invite (business email) + the confirmation email. Check the partner's working hours & DST.</span></li>
+   <li><span class="k">Same day</span><span>HubSpot note with ONLY lead-stated facts. Check the QA analysis — 'Cancel or requalify' = stop.</span></li>
+   <li><span class="k">Accept?</span><span>Track whether they accepted the invite. No accept within 24h → call/WhatsApp/email.</span></li>
+   <li><span class="k">24h before</span><span>Confirmation call or email: “Still good for tomorrow at X your time?”</span></li>
+   <li><span class="k">1h before</span><span>Final touch. If they can't make it, tell the partner at least 1 hour before.</span></li>
+   <li><span class="k">No-show</span><span>Call back same day to rebook. It only counts once it's attended.</span></li></ul>`;
+}
+$$("[data-copy]").forEach(b=>b.onclick=()=>copyText($("#"+b.dataset.copy).textContent));
+
+// ============================== REGION GUIDE =============================
+function renderRegions(){
+  $("#regionIntro").innerHTML = `<p style="margin:0 0 6px">Same offer, different delivery. Pick the region at the top and every line in Live Call switches to that version. The rules below come from cultural-norm research plus what's working on our own Aircall recordings — <b>use the words only where they feel natural</b>; a forced accent or slang does more harm than good.</p>
+  <p class="mini" style="margin:0">Prime windows below are lead-local 9:00–11:30 and 13:30–16:30 on weekdays, converted to PHT for today (daylight saving handled automatically).</p>`;
+  $("#regionCards").innerHTML = Object.entries(REGIONS).map(([k,r])=>{
+    const tz = r.tzs[0][0];
+    const conv = (h,m)=>{ const now=new Date(); const lp=localParts(tz,now); const d=new Date(Date.UTC(lp.y,lp.m-1,lp.d,h,m)-tzOffsetMin(tz,now)*60000); return fmtTime("Asia/Manila",d); };
+    return `<div class="card rc"><h4>${r.flag} ${r.name}</h4><div class="now">Now ${fmtTime(tz)} (${r.tzs[0][1]}) · Prime in PHT: ${conv(9,0)}–${conv(11,30)} &amp; ${conv(13,30)}–${conv(16,30)}</div>
+     <div style="margin-top:6px;font-weight:700">${r.vibe}</div><div class="mini">${r.pace}</div>
+     <div style="margin-top:6px">${r.use.map(u=>`<span class="tag" style="display:inline-block;background:var(--blue-soft);color:var(--blue);border-radius:5px;padding:1px 6px;margin:2px;font-size:11px;font-weight:600">${esc(u)}</span>`).join("")}</div>
+     <div>${r.avoid.map(u=>`<span style="display:inline-block;background:var(--red-soft);color:var(--red);border-radius:5px;padding:1px 6px;margin:2px;font-size:11px;font-weight:600">✕ ${esc(u)}</span>`).join("")}</div>
+     <ul>${r.notes.map(n=>`<li>${esc(n)}</li>`).join("")}</ul>
+     <button class="copy" data-switch="${k}">Use ${k} style →</button></div>`;
+  }).join("");
+  $$("[data-switch]").forEach(b=>b.onclick=()=>{ S.region=b.dataset.switch; S.tz=REGIONS[S.region].tzs[0][0]; save(); refreshAll(); showTab("live"); });
+}
+
+// ============================== RULES ====================================
+function renderRules(){
+  $("#rulesPage").innerHTML = `<div class="card" style="margin-bottom:12px;background:var(--navy);color:#fff"><b style="color:#ff8cc6">Why this page exists:</b> since Aug 26, 20 of 26 partner disputes were upheld. Almost every one traces back to the same few habits — a coached timeline, a non-decision-maker, an on-site role, or promising things the partner can't deliver. Avoid these and your DCs count.</div>
+  <div class="two"><div class="card"><h3 style="color:var(--green)">✔ Do</h3><ol class="dd">${DOS.map(([d,s])=>`<li>${esc(d)}<div class="src">${esc(s)}</div></li>`).join("")}</ol></div>
+  <div class="card"><h3 style="color:var(--red)">✕ Don't</h3><ol class="dd">${DONTS.map(([d,s])=>`<li>${esc(d)}<div class="src">${esc(s)}</div></li>`).join("")}</ol></div></div>
+  <div class="card" style="margin-top:12px"><h3>Say this, not that</h3><table class="say-not"><tr><th>Say</th><th>Not</th></tr>${SAY_NOT.map(([a,b])=>`<tr><td>✔ ${esc(a)}</td><td style="color:var(--red)">✕ ${esc(b)}</td></tr>`).join("")}</table></div>
+  <div class="card" style="margin-top:12px"><h3>The 5 things every DC needs, in the lead's own words</h3><ol class="dd"><li>Role / tasks that can be done on a computer (offshore-suitable)</li><li>Full-time, 30–40 hours (not part-time, project or commission-only)</li><li>Hiring timeline within ~1–2 months — THEIR words</li><li>A spoken yes to offshore</li><li>The decision-maker on the call (and ${CONFIG.minEmployees}+ active employees)</li></ol></div>`;
+}
+
+// ============================== STATS / GAME =============================
+const today = () => new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Manila"}).format(new Date());
+function getDay(d=today()){ const all = store.get("stats",{}); return all[d] || {dials:0,connects:0,convos:0,callbacks:0,booked:0,objection:0}; }
+function setDay(v,d=today()){ const all = store.get("stats",{}); all[d]=v; store.set("stats",all); }
+const PTS = {dials:1,connects:2,convos:3,callbacks:5,booked:25,objection:1};
+let lastAction = null;
+function bump(k, silent){
+  const d = getDay(); d[k]=(d[k]||0)+1; setDay(d); lastAction = k;
+  const life = store.get("life",{convosSinceBook:0,totalBooked:0,totalConvos:0});
+  if(k==="convos"){ life.convosSinceBook++; life.totalConvos++; }
+  if(k==="booked"){ life.convosSinceBook=0; life.totalBooked++; }
+  store.set("life",life);
+  if(!silent && k!=="booked") toast(({dials:"+1 dial — keep the rhythm",connects:"Connected! Smile & slow down",convos:"+1 real conversation 👊",callbacks:"Callback set — keep that promise"})[k]||"+1");
+  renderStats(); if(!$("#tab-me").classList.contains("hidden")) renderMe();
+}
+function undo(){ if(!lastAction) return; const d=getDay(); d[lastAction]=Math.max(0,(d[lastAction]||0)-1); setDay(d); lastAction=null; renderStats(); toast("Undone"); }
+function points(d){ return Object.entries(PTS).reduce((s,[k,p])=>s+(d[k]||0)*p,0); }
+function totalPoints(){ const all=store.get("stats",{}); return Object.values(all).reduce((s,d)=>s+points(d),0); }
+const LEVELS = ["Rookie Dialer","Opener","Conversationalist","Qualifier","Closer","Booking Machine","Floor Legend"];
+function motivation(d){
+  const life = store.get("life",{convosSinceBook:0,totalBooked:0,totalConvos:0});
+  const ratio = life.totalBooked>=3 ? Math.max(3,Math.round(life.totalConvos/life.totalBooked)) : 21;
+  const src = life.totalBooked>=3 ? "your own average" : "UK benchmark (~1 meeting per 21 conversations)";
+  if(d.booked >= CONFIG.dailyBookingGoal) return `🔥 <b>Goal smashed</b> — ${d.booked} booked today. Every extra qualified DC now is pure upside.`;
+  if(d.booked>0) return `Nice — <b>${d.booked} on the board</b>. ${CONFIG.dailyBookingGoal-d.booked} more to hit today's goal. Same energy on the next dial.`;
+  const left = Math.max(1, ratio - life.convosSinceBook);
+  if(life.convosSinceBook >= ratio) return `You've had <b>${life.convosSinceBook} conversations</b> since your last booking — by ${src} you're <b>overdue</b>. The next one could be it. Slow down, ask, listen.`;
+  return `Based on ${src}, you're roughly <b>${left} conversation${left>1?"s":""}</b> from your next booking. Every “no” is a step closer — not a verdict on you.`;
+}
+function renderStats(){
+  const d = getDay(), pct = Math.min(100, Math.round((d.booked/CONFIG.dailyBookingGoal)*100));
+  const tp = totalPoints(), lvl = Math.min(LEVELS.length-1, Math.floor(tp/150));
+  $("#statsMini").innerHTML = `<h3>Today's game · ${today()}</h3>
+   <div class="grid">
+    <button class="ct" data-k="dials"><b>${d.dials}</b><span>Dials</span></button>
+    <button class="ct" data-k="connects"><b>${d.connects}</b><span>Connects</span></button>
+    <button class="ct" data-k="convos"><b>${d.convos}</b><span>Convos</span></button>
+    <button class="ct" data-k="callbacks"><b>${d.callbacks}</b><span>Callbacks</span></button>
+    <button class="ct bk" data-k="booked"><b>${d.booked}</b><span>Booked ✔</span></button>
+    <button class="ct" id="undoBtn"><b>↶</b><span>Undo</span></button>
+   </div>
+   <div class="lvl"><span>Bookings ${d.booked}/${CONFIG.dailyBookingGoal}</span><span>${points(d)} pts today</span></div>
+   <div class="bar"><i style="width:${pct}%"></i></div>
+   <div class="lvl"><span>Level: ${LEVELS[lvl]}</span><span>${tp} pts total</span></div>
+   <div class="motiv">${motivation(d)}</div>`;
+  $$("#statsMini [data-k]").forEach(b=>b.onclick=()=>{ if(b.dataset.k==="booked"){ const v=verdict(); if(v.cls!=="book" && !confirmInline()) return; bump("booked"); celebrate(); } else bump(b.dataset.k); });
+  $("#undoBtn").onclick = undo;
+}
+function confirmInline(){ toast("Gate isn't green — only count QUALIFIED bookings (tap Booked again within 3s to override)"); if(window.__ovr && Date.now()-window.__ovr<3000){ window.__ovr=0; return true; } window.__ovr=Date.now(); return false; }
+function renderMe(){
+  const all = store.get("stats",{}); const days = Object.keys(all).sort().slice(-7);
+  const life = store.get("life",{convosSinceBook:0,totalBooked:0,totalConvos:0});
+  const tot = days.reduce((a,k)=>{ const d=all[k]; Object.keys(PTS).forEach(x=>a[x]=(a[x]||0)+(d[x]||0)); return a; },{});
+  const tp = totalPoints(), lvl = Math.min(LEVELS.length-1, Math.floor(tp/150)), nextAt=(lvl+1)*150;
+  const td = getDay();
+  const badges = [
+   ["🎯 First booking", life.totalBooked>=1],["🎩 Hat-trick day (3 in a day)", Object.values(all).some(d=>d.booked>=3)],
+   ["💯 100 dials in a day", Object.values(all).some(d=>d.dials>=100)],["🗣️ 25 conversations in a day", Object.values(all).some(d=>d.convos>=25)],
+   ["🛡️ Objection handler (20 rebuttals opened)", (tot.objection||0)>=20],["📞 Promise keeper (10 callbacks set)", (tot.callbacks||0)>=10],["🏆 10 career bookings", life.totalBooked>=10]];
+  const maxB = Math.max(1,...days.map(k=>all[k].booked||0));
+  $("#mePage").innerHTML = `<div class="two">
+   <div class="card"><h3>Your level</h3><div style="font-size:26px;font-weight:800">${LEVELS[lvl]}</div><div class="mini">${tp} pts · next level at ${nextAt} pts</div>
+    <div class="bar"><i style="width:${Math.round(((tp%150)/150)*100)}%"></i></div>
+    <div class="mini">Points: dial 1 · connect 2 · conversation 3 · callback 5 · <b>qualified booking 25</b> · rebuttal used 1</div>
+    <div class="badges">${badges.map(([b,g])=>`<span class="${g?'got':''}">${g?'':'🔒 '}${b}</span>`).join("")}</div>
+    <div class="motiv" style="margin-top:12px">${motivation(td)}</div></div>
+   <div class="card"><h3>Last 7 days — bookings</h3>
+    ${days.length?days.map(k=>`<div style="display:flex;align-items:center;gap:8px;font-size:12px;margin:4px 0"><span style="width:84px;font-family:var(--mono)">${k.slice(5)}</span><div class="bar" style="flex:1;margin:0"><i style="width:${Math.round(((all[k].booked||0)/maxB)*100)}%"></i></div><b style="width:22px;text-align:right">${all[k].booked||0}</b><span class="mini" style="width:90px">${all[k].convos||0} convos</span></div>`).join(""):'<div class="mini">No calls logged yet — tap the counters on Live Call as you go.</div>'}
+    <div class="sep"></div>
+    <div class="mini">7-day totals: ${tot.dials||0} dials · ${tot.connects||0} connects · ${tot.convos||0} conversations · ${tot.booked||0} booked${tot.convos?` · ${Math.round(((tot.booked||0)/tot.convos)*1000)/10}% convo→booking`:""}</div></div></div>
+   <div class="two" style="margin-top:12px">
+   <div class="card"><h3>💰 Incentive</h3><p style="margin:0">${esc(CONFIG.incentiveText)}</p><p class="mini">Clean qualification = your booking survives QA and the partner. A disputed DC is effort with no credit.</p></div>
+   <div class="card"><h3>Mindset for the next dial</h3><ul class="dd">
+    <li><b>A “no” is data, not a judgement.</b> Most bookings come after many no's — the maths is on your side if you keep dialling.</li>
+    <li><b>Curiosity beats pressure.</b> Successful cold calls run about 2× longer than failed ones — because the rep asked and listened.</li>
+    <li><b>Reset after every call:</b> one breath, smile, read the next lead's region badge, dial.</li>
+    <li><b>Protect your best hours.</b> Batch dials into the lead's prime window (see Region Guide) and admin outside it.</li>
+    <li><b>Celebrate the small wins:</b> a callback kept, a referral gained, a clean recap.</li></ul></div></div>
+   <div class="card" style="margin-top:12px"><h3>Floor wins — lines your teammates use that work</h3>${FLOOR_WINS.map(([w,l])=>`<div class="floor"><b>${w}:</b> ${esc(l)}</div>`).join("")}</div>`;
+}
+function celebrate(){
+  const c = document.createElement("div"); c.className="confetti";
+  const cols=["#d6006e","#ff8cc6","#0a8f5a","#2457d6","#ffc400"];
+  for(let i=0;i<70;i++){ const p=document.createElement("i"); p.style.left=Math.random()*100+"vw"; p.style.background=cols[i%5]; p.style.animationDelay=(Math.random()*0.6)+"s"; p.style.animationDuration=(1.4+Math.random())+"s"; c.appendChild(p); }
+  document.body.appendChild(c); setTimeout(()=>c.remove(),3200);
+  const msgs=["BOOKED! 🎉 Now lock in the show-up.","That's how it's done! Send the invite now.","+25 pts — qualified DC on the board!"];
+  toast(msgs[Math.floor(Math.random()*msgs.length)]);
+}
+
+// ============================== UTIL / NAV ===============================
+function toast(m){ const t=$("#toast"); t.innerHTML=m; t.classList.add("show"); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove("show"),2600); }
+async function copyText(s){ try{ await navigator.clipboard.writeText(s); toast("Copied"); }catch(e){ toast("Copy blocked — select the text and Ctrl+C"); } }
+function showTab(name){
+  $$("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.tab===name));
+  ["live","rebuttals","regions","rules","log","me"].forEach(t=>$("#tab-"+t).classList.toggle("hidden",t!==name));
+  if(name==="rebuttals"){ renderRebuttals(); setTimeout(()=>$("#rSearch").focus(),50); }
+  if(name==="regions") renderRegions();
+  if(name==="rules") renderRules();
+  if(name==="log") renderLog();
+  if(name==="me") renderMe();
+}
+$$("#tabs button").forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
+document.addEventListener("keydown",e=>{
+  const typing = ["INPUT","TEXTAREA","SELECT"].includes(document.activeElement.tagName);
+  if(e.key==="Escape"){ closeModal(); if(typing) document.activeElement.blur(); return; }
+  if(typing) return;
+  if(e.key==="/"){ e.preventDefault(); showTab("rebuttals"); }
+  if(e.key==="ArrowRight" && !$("#tab-live").classList.contains("hidden")) go(S.step+1);
+  if(e.key==="ArrowLeft" && !$("#tab-live").classList.contains("hidden")) go(S.step-1);
+});
+function refreshAll(){ renderRegionBtns(); tick(); renderSteps(); renderStep(); renderGate(); renderStats(); renderLog(); if(!$("#tab-regions").classList.contains("hidden")) renderRegions(); }
+refreshAll();
+
+</script>
+</body>
+</html>
