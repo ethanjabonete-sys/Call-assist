@@ -176,7 +176,7 @@ table.say-not th{font-size:11px;letter-spacing:.07em;text-transform:uppercase;co
   <div class="fld"><label>Lead first name</label><input id="f_lead" placeholder="e.g. Sharon"></div>
   <div class="fld"><label>Company</label><input id="f_company" placeholder="e.g. TruHoney"></div>
   <div class="fld"><label>Their title</label><input id="f_title" placeholder="e.g. Operations Manager"></div>
-  <div class="fld"><label>Industry</label><input id="f_industry" placeholder="e.g. food export"></div>
+  <div class="fld"><label>Industry</label><select id="f_industry"></select></div>
   <div class="fld"><label>&nbsp;</label><button class="copy" id="newLead" style="border:1px solid var(--line);border-radius:7px;padding:7px 10px;background:#fff">↺ New lead</button></div>
 </div>
 
@@ -236,6 +236,67 @@ const CONFIG = {
   incentiveText: "Ask your TL for this month's DC incentive - every QUALIFIED + ATTENDED DC counts. Disputed DCs don't.",
   minEmployees: 3                       // Oct 26 Process Alignment: 3+ active employees (FT or PT) can be booked
 };
+
+// ============================== INDUSTRY → ROLES ==========================
+// Industries = the 53 tracked in the Jan–Aug 2026 Industry Yield report.
+// Roles = common computer-based (offshore-suitable) seats in that industry.
+// TLs: edit freely. COMMON_ROLES is shown under every industry.
+const INDUSTRY_ROLES = {
+  "Accounting":["bookkeeper","accounts payable / receivable clerk","payroll officer","tax preparer","junior accountant","audit assistant","client services admin"],
+  "Apparel & Fashion":["e-commerce assistant","product listing specialist","customer service rep","graphic designer","social media coordinator","order & inventory admin"],
+  "Architecture & Planning":["architectural drafter (CAD)","Revit / BIM modeller","3D visualiser","project coordinator","document controller","planning admin"],
+  "Automotive":["parts interpreter","service & warranty admin","customer service rep","CRM / sales admin","digital marketing assistant","bookkeeper"],
+  "Banking":["loan processor","KYC / AML analyst","reconciliation officer","credit analyst","customer service rep","back-office operations"],
+  "Building Materials":["estimator","quoting & sales support","order processing admin","customer service rep","accounts receivable clerk","inventory coordinator"],
+  "Civil Engineering":["civil drafter (Civil 3D / CAD)","design engineer","estimator","quantity surveyor","document controller","project coordinator"],
+  "Computer & Network Security":["SOC analyst","IT helpdesk support","network administrator","security engineer","compliance analyst","technical writer"],
+  "Construction":["estimator","quantity surveyor","CAD drafter","project coordinator","scheduler / planner","document controller","construction admin","accounts payable clerk"],
+  "Design":["graphic designer","UI / UX designer","3D artist / renderer","video editor","production artist","project coordinator"],
+  "Electrical / Electronic Mfg":["electrical drafter (CAD)","PCB designer","estimator","purchasing officer","order processing admin","technical support"],
+  "Entertainment":["video editor","social media manager","graphic designer","content coordinator","booking admin","customer support"],
+  "Environmental Services":["GIS technician","environmental data analyst","report writer","compliance admin","CAD drafter","scheduling coordinator"],
+  "Events Services":["event coordinator","registration & ticketing support","graphic designer","social media coordinator","vendor & booking admin","customer service rep"],
+  "Facilities Services":["dispatch / scheduling coordinator","work order admin","helpdesk support","procurement assistant","accounts payable clerk","customer service rep"],
+  "Financial Services":["paraplanner","client services officer","loan processor","financial analyst","compliance admin","bookkeeper"],
+  "Food & Beverages":["order processing / sales admin","customer service rep","purchasing assistant","e-commerce assistant","graphic designer","bookkeeper"],
+  "Food Production":["production planner","purchasing officer","QA documentation officer","order processing admin","inventory coordinator","accounts payable clerk"],
+  "Furniture":["e-commerce / product listing assistant","3D visualiser","customer service rep","order processing admin","graphic designer","bookkeeper"],
+  "Health, Wellness & Fitness":["booking coordinator","virtual receptionist","membership admin","social media / content creator","customer support","bookkeeper"],
+  "Hospital & Health Care":["medical biller / coder","medical virtual assistant","patient scheduler","insurance verification specialist","medical scribe","health information admin"],
+  "Hospitality":["reservations agent","revenue / channel manager","guest services (remote)","night audit (remote)","social media coordinator","accounts payable clerk"],
+  "Information Services":["data analyst","research assistant","data entry / cleansing","content writer","software developer","customer support"],
+  "Insurance":["claims processor","underwriting assistant","policy admin","renewals coordinator","insurance verification specialist","customer service rep"],
+  "IT & Services":["software developer","web developer","IT helpdesk support","QA tester","DevOps / cloud engineer","project manager","data analyst"],
+  "Law Practice":["paralegal","legal assistant","legal secretary","conveyancing clerk","legal billing / trust accounts","document review"],
+  "Legal Services":["paralegal","legal assistant","legal secretary","conveyancing clerk","legal billing / trust accounts","document review"],
+  "Leisure, Travel & Tourism":["travel consultant","reservations agent","itinerary planner","customer service rep","social media coordinator","bookkeeper"],
+  "Logistics & Supply Chain":["freight coordinator","dispatcher","customs & documentation clerk","customer service rep","accounts receivable clerk","inventory / data analyst"],
+  "Machinery":["mechanical drafter (CAD)","estimator","parts & sales support","technical writer","order processing admin","service scheduler"],
+  "Management Consulting":["research analyst","executive assistant","data analyst","presentation designer","project coordinator","bookkeeper"],
+  "Marketing & Advertising":["graphic designer","social media manager","SEO specialist","content writer","paid ads (PPC) specialist","video editor","web developer"],
+  "Mechanical / Industrial Engineering":["mechanical drafter (CAD)","design engineer (SolidWorks)","estimator","technical writer","procurement officer","project coordinator"],
+  "Media Production":["video editor","motion graphics designer","production coordinator","social media coordinator","graphic designer","transcription / captioning"],
+  "Medical Devices":["regulatory affairs assistant","QA documentation officer","technical support","customer service rep","sales admin","order processing admin"],
+  "Medical Practice":["virtual medical receptionist","medical biller","medical scribe","patient scheduler","insurance verification specialist","practice admin"],
+  "Mining & Metals":["mining drafter (CAD)","geology / data technician","procurement officer","document controller","HSE admin","accounts payable clerk"],
+  "Oil & Energy":["engineering drafter (CAD)","document controller","procurement officer","data analyst","HSE admin","accounts payable clerk"],
+  "Printing":["prepress / graphic designer","quoting & customer service","estimator","order processing admin","e-commerce assistant","bookkeeper"],
+  "Professional Training & Coaching":["executive / virtual assistant","instructional designer","LMS admin","client support","social media coordinator","bookkeeper"],
+  "Public Relations & Communications":["PR assistant","content writer","media monitoring analyst","social media coordinator","graphic designer","account coordinator"],
+  "Publishing":["editor / proofreader","typesetter / layout designer","content writer","graphic designer","rights & permissions admin","customer service rep"],
+  "Real Estate":["property management assistant","real estate virtual assistant","transaction coordinator","leasing admin","listings & marketing coordinator","trust accounts / bookkeeper"],
+  "Renewables & Environment":["solar designer (CAD)","proposals & sales support","project coordinator","permits & grants admin","data analyst","customer service rep"],
+  "Research":["research assistant","data analyst","data entry specialist","report writer","survey / panel coordinator","literature reviewer"],
+  "Retail":["e-commerce assistant","customer service rep","product listing specialist","inventory coordinator","social media coordinator","bookkeeper"],
+  "Security & Investigations":["remote monitoring operator","rostering / scheduling coordinator","investigations researcher","customer service rep","admin assistant","accounts receivable clerk"],
+  "Semiconductors":["design / verification engineer","technical writer","procurement officer","data analyst","sales admin","customer support"],
+  "Sports":["social media / content creator","video editor / analyst","membership admin","graphic designer","event coordinator","bookkeeper"],
+  "Telecommunications":["technical support","customer service rep","network engineer","provisioning / order admin","billing specialist","sales support"],
+  "Transportation / Trucking":["dispatcher","logistics coordinator","freight billing / invoicing","driver compliance admin","customer service rep","accounts receivable clerk"],
+  "Utilities":["billing specialist","customer service rep","GIS technician","data analyst","scheduling coordinator","document controller"],
+  "Wholesale":["order processing admin","customer service rep","purchasing officer","inventory coordinator","accounts receivable clerk","sales support"]
+};
+const COMMON_ROLES = ["admin assistant","executive assistant","virtual assistant","customer service rep","bookkeeper","data entry specialist","marketing assistant","graphic designer"];
 
 // ============================== REGIONS ==================================
 const REGIONS = {
@@ -373,7 +434,7 @@ const REBUTTALS = [
   tip:"Name, reason, one question — in one breath, then stop. If they genuinely can't hear/understand you, slow down and re-introduce — that's the line, not an objection.",
   floor:"Marc booked with: “World's leading marketplace for offshore staffing — think recruitment, but offshore.” (In AU/NZ drop 'world's leading'.)"},
  {id:"notint",cat:"open",title:"Not interested (early)",trig:"not interested · no thanks · we're fine",
-  say:"{ack} Before I let you go — is it more that your hiring is sorted, or that it's just not a priority right now?\n\n(if sorted) Totally understand. Most people I speak to aren't looking to change anything — they just like to know their benchmark. How's the in-house team going for finding good people?\n(if not a priority) When do you think it might be back on the radar? I'm happy to give you a quick call then.",
+  say:"{ack} Before I let you go — is it more that your hiring is sorted, or that it's just not a priority right now?\n\n(if sorted) Totally understand. Most people I speak to aren't looking to change anything — they just like to know how their hiring costs compare. How's it going finding good people locally?\n(if not a priority) When do you think it might be back on the radar? I'm happy to give you a quick call then.",
   tip:"Ask ONE diagnostic question, then respect the answer. If it's a second clear no, exit warmly — pushing after a clear no is what UK/NZ buyers (and SP partners) punish.",
   floor:"Marc: “Is it okay to touch base end of Q1 next year? Things could happen — you might expand by then.”"},
  {id:"busy",cat:"open",title:"Busy · in a meeting · driving",trig:"I'm driving · in a meeting · bad time · call me back",
@@ -400,11 +461,11 @@ const REBUTTALS = [
   tip:"Probe for a role and THEIR timeline. If it's within ~2 months and they name it → qualify. If later → dated callback. Never manufacture a role or a timeline.",
   floor:"Jesley: “We understand you might not be hiring this exact minute, and we're not trying to fill a seat this week.” · Marc: “Whenever you hire, what roles do you normally prioritise?”"},
  {id:"recruiter",cat:"discover",title:"We use a recruiter / have an agency / sole agreement",trig:"we have a recruiter · agency · sole agreement · in-house talent team",
-  say:"Makes sense — sounds like it's working for you. We're not here to replace anyone; most people just like a benchmark of what the same role costs offshore.\n\nWhen does that arrangement next come up for review — or when would you next look at options?",
+  say:"Makes sense — sounds like it's working for you. We're not here to replace anyone; most people just like to know what the same role would cost offshore.\n\nWhen does that arrangement next come up for review — or when would you next look at options?",
   tip:"Don't knock their recruiter. If there's a real near-term need for an offshore-suitable role, qualify it. Otherwise lock a dated callback near their review date.",
   floor:"Vincent: “Since it's a discovery call, we're not aiming to change your existing process — we'd just like to be someone you can consider.”"},
  {id:"alreadyoff",cat:"discover",title:"We already have an offshore team",trig:"we already have people offshore · we have an office in Manila/India",
-  say:"Oh nice — so you already know the model works. Is that through your own office, or through an outsourcing firm? (pause)\n\nAnd are you happy with BOTH the quality and the cost, or is there a bit of room on either?",
+  say:"Oh nice — so you already know the model works. Is that through your own office, or through an outsourcing firm? (pause)\n\nAnd are you happy with BOTH the quality and the cost, or is there room to improve on either?",
   tip:"Don't disqualify. 'Happy with both?' is a double gate — most people are happy with one, not both. Is there another role on the horizon?",
   floor:"Summer: “Which region? …That's wonderful — you already have the idea how the model works.”"},
  {id:"small",cat:"discover",title:"We're only a small team",trig:"we're small · just a few of us · one-man band",
@@ -415,16 +476,16 @@ const REBUTTALS = [
   tip:"Probe the tasks behind the role. If there's a genuinely computer-based need, qualify that. If everything is physical, be honest that it can't be outsourced and exit — that honesty is what keeps SP trust.",
   floor:"Marc: “The one you mentioned needs to be done on-site — that cannot be outsourced, I'll be honest with you on that. But I looked at your website…”"},
  {id:"ai",cat:"discover",title:"We use AI for that",trig:"AI does that · we use ChatGPT/automation",
-  say:"Smart move. Most of our clients use AI too — they still keep a person to check the edge cases and handle the relationships, and our partners' people are skilled in those AI tools. Would it be worth seeing how others combine both?",
+  say:"Smart move. Most of our clients use AI too — they still keep a person to handle the tricky stuff and the relationships, and the partners' staff already use those AI tools. Would it be worth seeing how others combine both?",
   tip:"Yes-AND the AI. Never argue against it.",floor:"Marc booked with this framing."},
  {id:"notmine",cat:"discover",title:"That role isn't mine / wrong person",trig:"I don't handle hiring · not my department",
   say:"Ah, that's my mistake — thanks for putting me straight. Who'd be the right person for that? (pause) Or even just which office it sits with, and I'll find them.\n\n(only if they're still chatting) And what does your side of the business look after?",
   tip:"Own it in three words, get the name, don't pitch. Log it as wrong contact, not 'not interested'.",floor:""},
  {id:"parttime",cat:"qualify",title:"Part-time only",trig:"part-time · a few hours · project basis",
-  say:"Sure, that's fair — can I ask what's making you lean part-time rather than full-time?\n\n(budget) Part-time looks cheaper up front, but offshore usually saves around {savings} compared to hiring locally — so a full-time dedicated person often costs about what part-time help costs locally. If the numbers stacked up, would a full-time seat work?\n(workload) That's the most common reason. What tends to happen is the work finds the seat — once someone's there full-time you hand over the things you've been holding onto. Would that be closer to it?\n(exploring) Totally sensible way to start. Full-time just gives you consistency — one person who learns how you work. If it made sense, would you keep it full-time?",
+  say:"Sure, that's fair — can I ask what's making you lean part-time rather than full-time?\n\n(budget) Part-time looks cheaper up front, but offshore usually saves around {savings} compared to hiring locally — so a full-time dedicated person often costs about what part-time help costs locally. If the numbers stacked up, would a full-time seat work?\n(workload) That's the most common reason. What usually happens is once someone's there full-time, you start handing over the things you've been holding onto yourself. Would that be closer to it?\n(exploring) Totally sensible way to start. Full-time just gives you consistency — one person who learns how you work. If it made sense, would you keep it full-time?",
   tip:"Probe BEFORE you rebut. If it stays part-time / project / commission-only → it does NOT qualify. Don't force it; nurture.",floor:"Approved budget reframe from Summer: “You'd be paying for those hours anyway — and still saving.”"},
  {id:"later",cat:"qualify",title:"Timeline 3+ months / call me in six months",trig:"next year · after Christmas · end of financial year · down the track",
-  say:"That's really useful, thanks. Worth knowing that terms, onboarding and getting the right person in place often takes a month or two on its own, so some people like to see options early.\n\nWould it be more useful to see the comparison now, or shall I give you a call nearer the time — say {callbackHint}?",
+  say:"That's really useful, thanks. Worth knowing that finding the right person and getting them started often takes a month or two on its own, so some people like to see options early.\n\nWould it be more useful to see the comparison now, or shall I give you a call nearer the time — say {callbackHint}?",
   tip:"Log THEIR timeline in their words. If they choose 'later' → set a DATED callback (day + time) and keep your promise. Don't convert 'three months' into 'one to two'.",
   floor:"Marc: “So maybe Tuesday the 12th, 12pm — just a quick call, not a meeting yet.”"},
  {id:"funding",cat:"qualify",title:"Waiting on funding / budget approval",trig:"waiting on funding · seed round · budget approval",
@@ -443,7 +504,7 @@ const REBUTTALS = [
   say:"Really common question. The partners screen properly — skills, references, communication — and you see people before you agree to anyone.\n\nWhat does 'quality' mean for this role for you — technical skill, communication, reliability? Once I know, I'll be straight with you about whether it's a fit.",
   tip:"Let them define the standard. Don't default to 'Philippines' — you don't know which partner they'll be matched to yet.",floor:""},
  {id:"tried",cat:"qualify",title:"Tried outsourcing before — bad experience",trig:"tried it · got burned · didn't work",
-  say:"I'm really glad you told me — that changes how I'd approach it. What went sideways — the people, the communication, the management side? (listen)\n\nThat's usually a sourcing problem — whoever was free instead of whoever was right. That's why you'd compare two vetted partners side by side before committing. Worth a look?",
+  say:"I'm really glad you told me — that changes how I'd approach it. What went sideways — the people, the communication, the management side? (listen)\n\nThat usually comes down to who you were matched with — whoever was free instead of whoever was right. That's why you'd compare two vetted partners side by side before committing. Worth a look?",
   tip:"Listen more than you talk. 'Tried before' = they've validated the concept.",floor:""},
  {id:"two",cat:"close",title:"Why two meetings? / Just one please",trig:"why two · only have time for one",
   say:"Good question — because we're a marketplace, not one agency. Each partner prices and runs the role a bit differently, so two back-to-back calls give you an apples-to-apples comparison in one sitting. It's meant to save you time.\n\n(if they insist) No problem — let's do one and keep it tight.",
@@ -452,7 +513,7 @@ const REBUTTALS = [
   say:"Let me set that straight so there's no surprise later: we won't be sending CVs ourselves — we're a marketplace, not a recruitment agency. The providers you'll meet are the ones who recruit and shortlist. You brief them on the role, they present candidates, and you choose who you want to work with. What I do is make sure the providers in front of you are the right fit.\n\nDoes that match what you were expecting?",
   tip:"Correct it in the SAME breath and confirm it landed. A silent nod created a stalled deal and an SP escalation.",floor:"From Ritch's floor advisory — use these words."},
  {id:"cost",cat:"close",title:"How much does it cost?",trig:"how much · what's the rate · pricing",
-  say:"Honest answer: the partners price against your exact requirements, so I won't guess and give you a wrong number. As a market guide, most businesses save around {savings} compared to hiring locally. Getting the real figure for {role} is exactly what the call's for — fair enough?",
+  say:"Honest answer: the partners price it based on exactly what you need, so I won't guess and give you a wrong number. As a rough guide, most businesses save around {savings} compared to hiring locally. Getting the real figure for {role} is exactly what the call's for — fair enough?",
   tip:"Never quote a rate or a partner price — a number you say becomes the anchor the partner has to fight.",floor:""},
  {id:"think",cat:"close",title:"I need to think about it",trig:"let me think · I'll get back to you",
   say:"Of course. Can I ask what you'd want to think through — timing, fit, or something else? (pause)\n\nThe partners answer most of that on the call itself — it's {meeting} of straight info, not a pitch. Would {day1} or {day2} work just to get it in front of you?",
@@ -527,7 +588,7 @@ const HOOKS = [
    NZ:"For a lot of businesses, one local salary ends up covering two people. Would that sort of thing be useful for you?"},
   note:"Honest maths: {savings} less = roughly 2× (at 50%) to 3× (at 70%). Say 'two, sometimes three' — never a flat '3 for 1', and never promise identical experience."},
  {id:"same",label:"Same job, different postcode",when:"When they think offshore = lower quality",
-  say:{default:"It's the same job, done by an experienced full-time person — the main difference is the postcode, and the salary that comes with it.",
+  say:{default:"It's the same job, done by an experienced full-time person — the main difference is the location, and the salary that comes with it.",
    UK:"It's the same job, done by an experienced, full-time person — really the only difference is the postcode, and the cost that comes with it.",
    AU:"Same job, same hours, experienced person — just a different postcode, and a very different wage bill.",
    NZ:"It's the same work done by an experienced, full-time person — just based somewhere with a lower cost of living."},
@@ -545,9 +606,9 @@ const HOOKS = [
    NZ:"Roles are taking a couple of months to fill on average — how's that been going for you?"},
   note:"US benchmark: ~63.5 days to fill in 2025 (Employ / HR Dive). Use it as their PAIN only — never promise the partner will fill it faster."},
  {id:"benchmark",label:"Know your number",when:"'We're fine' / 'not looking to change anything'",
-  say:{default:"Even if you never change a thing, it's worth knowing your number — what that same role would cost offshore. It's 15 minutes, and you keep the comparison either way.",
-   UK:"Even if you never change a thing, it's worth knowing your number — what that same role would cost offshore. Fifteen minutes, and the comparison's yours to keep.",
-   AU:"Even if you never change a thing, it's handy to know your number. Fifteen minutes and you keep the comparison either way.",
+  say:{default:"Even if you never change a thing, it's worth knowing what that same role would cost offshore. It's 15 minutes, and you keep the comparison either way.",
+   UK:"Even if you never change a thing, it's worth knowing what that same role would cost offshore. Fifteen minutes, and the comparison's yours to keep.",
+   AU:"Even if you never change a thing, it's handy to know what the same role would cost offshore. Fifteen minutes and you keep the comparison either way.",
    NZ:"No pressure to change anything — it's just useful to know what your options look like. Fifteen minutes, and you keep the info."},
   note:"Low-commitment framing. Still needs the 4 criteria before it counts as a DC."},
  {id:"peers",label:"Your peers are doing it",when:"Sceptical / 'is this a fad?'",
@@ -669,9 +730,15 @@ function renderRegionBtns(){
   $("#tzSel").innerHTML = REGIONS[S.region].tzs.map(([v,l])=>`<option value="${v}" ${v===S.tz?'selected':''}>${l}</option>`).join("");
 }
 $("#tzSel").onchange = e => { S.tz = e.target.value; save(); refreshAll(); };
+function renderIndustryOpts(){
+  const cur = S.f.industry||"", list = Object.keys(INDUSTRY_ROLES);
+  if(cur && !list.includes(cur)) list.push(cur); // keep an older free-text value
+  $("#f_industry").innerHTML = `<option value="">Select industry…</option>` + list.map(i=>`<option value="${esc(i)}">${esc(i)}</option>`).join("");
+}
+renderIndustryOpts();
 ["me","lead","company","title","industry"].forEach(k=>{
   const el = $("#f_"+k); el.value = S.f[k]||"";
-  el.oninput = () => { S.f[k]=el.value; if(k==="me") store.set("me",el.value); save(); renderStep(); renderLog(); };
+  el.oninput = () => { S.f[k]=el.value; if(k==="me") store.set("me",el.value); save(); renderStep(); renderLog(); if(k==="industry") renderGate(); };
 });
 if(!S.f.me) { S.f.me = store.get("me",""); $("#f_me").value = S.f.me; }
 $("#newLead").onclick = resetLead;
@@ -786,7 +853,9 @@ function renderGate(){
    <div class="verdict ${v.cls}"><span class="big">${v.big}</span><ul>${v.items.map(i=>`<li>${esc(i)}</li>`).join("")}</ul></div>
    <div class="row"><label>Active employees (their number)</label><input type="number" data-g="size" value="${esc(g.size)}" placeholder="e.g. 30"></div>
    <div class="row"><label>Recruitment / staffing firm?</label><select data-g="recruit"><option value="na">Not a recruitment firm</option><option value="internal">Yes — role is for their OWN team</option><option value="client">Yes — role is for a CLIENT</option></select></div>
-   <div class="row"><label>Role — in their words</label><input type="text" data-g="role" value="${esc(g.role)}" placeholder="e.g. admin assistant"></div>
+   <div class="row"><label>Role — in their words</label><input type="text" data-g="role" value="${esc(g.role)}" placeholder="e.g. admin assistant">
+     <select id="rolePick"><option value="">${S.f.industry&&INDUSTRY_ROLES[S.f.industry]?"Quick-pick a common "+esc(S.f.industry)+" role…":"Quick-pick a common role…"}</option>${INDUSTRY_ROLES[S.f.industry]?`<optgroup label="${esc(S.f.industry)}">${INDUSTRY_ROLES[S.f.industry].map(r=>`<option>${esc(r)}</option>`).join("")}</optgroup>`:""}<optgroup label="Any industry">${COMMON_ROLES.map(r=>`<option>${esc(r)}</option>`).join("")}</optgroup></select>
+     <span class="chk" style="color:var(--muted)">Pick only what THEY said — never suggest a role first.</span></div>
    <div class="row"><label>Tasks they described</label><textarea data-g="tasks" placeholder="e.g. quotes, invoicing, order updates">${esc(g.tasks)}</textarea>
      <span class="chk"><input type="checkbox" data-g="computer" ${g.computer?"checked":""}> Tasks are computer-based (can be done offshore)</span></div>
    <div class="row"><label>Hours</label><select data-g="ft"><option value="">—</option><option value="ft">Full-time 30–40h (they said it)</option><option value="pt">Part-time</option><option value="project">Project / ad-hoc / output-based</option><option value="comm">Commission-only</option></select></div>
@@ -810,6 +879,11 @@ function renderGate(){
     const ev = (el.type==="checkbox"||el.tagName==="SELECT"||el.type==="date"||el.type==="time") ? "onchange" : "oninput";
     el[ev] = () => { g[k] = el.type==="checkbox" ? el.checked : el.value; save(); updateVerdictOnly(); renderLog(); if(["role","date","time"].includes(k)) renderStep(); };
   });
+  $("#rolePick").onchange = e => {
+    if(!e.target.value) return;
+    const inp = $('#gate [data-g="role"]'); inp.value = e.target.value; e.target.value = "";
+    inp.oninput();
+  };
 }
 function updateVerdictOnly(){
   const v = verdict(), box = $("#gate .verdict");
