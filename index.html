@@ -381,19 +381,19 @@ const STEPS = [
   floor:[["Summer","“If you did put one person offshore, what role would you start with?” — lets them name it."],["Jesley","“We're not trying to fill a seat this week — we'd just love to be a resource for you.”"],["Pedro","“Do you have team members working remotely already?” — a natural bridge to offshore."]],
   branches:[{t:"Named computer-based work",go:"qualify",k:"go"},{t:"Not hiring right now",r:"nothiring"},{t:"Have a recruiter / agency",r:"recruiter"},{t:"Already offshore",r:"alreadyoff"},{t:"Small team",r:"small"},{t:"It's all on-site work",r:"onsite"},{t:"We use AI for that",r:"ai"},{t:"That role isn't mine",r:"notmine"}]},
 
- {id:"qualify",n:4,title:"Qualify (their words)",goal:"Four criteria + decision-maker, each answered IN THE LEAD'S OWN WORDS. Fill the panel on the right as you go.",
+ {id:"qualify",n:4,title:"Qualify (their words)",goal:"Four criteria + decision-maker, each confirmed BY THE LEAD. Fill the panel on the right as you go.",
   qs:[
    ["Full-time","Would you see that as a full-time seat — 30 to 40 hours a week — or something lighter than that?"],
-   ["Timeline","And if the right person came along, when would you ideally want them starting?   ← OPEN. Never offer “1–2 months”."],
+   ["Timeline","And if the right person came along, how soon would you want them starting — as soon as possible, in the next 1 to 2 weeks, or within the next 2 months?   ← Or ask directly: “Is that within the next 1 to 2 months?” The lead must pick or confirm it."],
    ["Offshore","Would you be open to that person being offshore — wherever the best fit is?   ← need a spoken YES."],
    ["Decision","Are you the one who'd sign off on this, or is someone else involved?"],
    ["Headcount","And just so I brief them properly — one person to start, or a small team?"]],
   say:{default:"(Ask conversationally, one at a time. Write down exactly what they say in the panel → the recap uses it.)"},
   tip:"If timeline is > 2 months, or funding is pending past 2 months: don't convert it — set a DATED callback. If they say part-time, ask WHY before you rebut (budget vs workload vs just exploring).",
-  why:"20 of 26 SP disputes since Aug 26 were upheld. The repeat pattern (HOPLA, Sterling, Pandr): the 1–2 month answer came from the SDR's recap, not the lead. A coached 'yes' books — and then disputes or no-shows.",
+  why:"20 of 26 SP disputes since Aug 26 were upheld. The repeat pattern (HOPLA, Sterling, Pandr): the 1–2 month answer was assumed in the SDR's recap, never asked. Giving the lead timeline choices is fine — log the one THEY picked, and never assume it for them.",
   never:"Don't book: commission-only roles, project/ad-hoc, part-time that stays part-time, a non-decision-maker who pointed you to someone else, or a lead whose company policy may block non-local tax residents until they've confirmed.",
   floor:[["Jenny","“Can you give me a window — between nine and eleven? …and that's New Zealand time, right?”"],["Pedro","“If they found the perfect candidate and the pricing made sense, would you be bringing them on…?” — ok as a follow-up, but get THEIR timeframe first."]],
-  branches:[{t:"All four in their words",go:"position",k:"go"},{t:"Part-time only",r:"parttime"},{t:"Timeline 3+ months",r:"later"},{t:"Funding pending",r:"funding"},{t:"Not the decision-maker",r:"notdm"},{t:"Prefers local",r:"local"},{t:"Time-zone worry",r:"tz"},{t:"Quality / English worry",r:"quality"},{t:"Tried it before",r:"tried"}]},
+  branches:[{t:"All four confirmed",go:"position",k:"go"},{t:"Part-time only",r:"parttime"},{t:"Timeline 3+ months",r:"later"},{t:"Funding pending",r:"funding"},{t:"Not the decision-maker",r:"notdm"},{t:"Prefers local",r:"local"},{t:"Time-zone worry",r:"tz"},{t:"Quality / English worry",r:"quality"},{t:"Tried it before",r:"tried"}]},
 
  {id:"position",n:5,title:"Position the meeting",goal:"Say exactly what OA is and what the DC is — so nobody arrives expecting CVs from us.",
   say:{
@@ -422,7 +422,7 @@ const STEPS = [
   say:{default:"(The recap and HubSpot note are auto-built on the RECAP & LOG tab from what you typed in the panel.)\n\n“Just to recap so I've got it right: …” → wait for a clear spoken yes — a nod isn't on the recording.\n\nThen: {bye}"},
   tip:"The recap is what QA and the partner read. If a criterion is missing from the lead's own words, go back and ask it — don't fill the gap yourself.",
   why:"HubSpot disputes: notes that included things the lead never said (company size, timing, budget). Record ONLY lead-stated facts. Treat any 'Cancel or requalify' QA flag as a STOP until requalified.",
-  never:"Don't recap a timeline they didn't say. Don't round 'three months' down to 'one to two'.",
+  never:"Don't recap a timeline they didn't pick or confirm. Don't round 'three months' down to 'one to two'.",
   branches:[{t:"Open Recap & Log tab",tab:"log",k:"go"},{t:"Next lead ↺",reset:true}]}
 ];
 
@@ -486,7 +486,7 @@ const REBUTTALS = [
   tip:"Probe BEFORE you rebut. If it stays part-time / project / commission-only → it does NOT qualify. Don't force it; nurture.",floor:"Approved budget reframe from Summer: “You'd be paying for those hours anyway — and still saving.”"},
  {id:"later",cat:"qualify",title:"Timeline 3+ months / call me in six months",trig:"next year · after Christmas · end of financial year · down the track",
   say:"That's really useful, thanks. Worth knowing that finding the right person and getting them started often takes a month or two on its own, so some people like to see options early.\n\nWould it be more useful to see the comparison now, or shall I give you a call nearer the time — say {callbackHint}?",
-  tip:"Log THEIR timeline in their words. If they choose 'later' → set a DATED callback (day + time) and keep your promise. Don't convert 'three months' into 'one to two'.",
+  tip:"Log the timeline THEY picked. If they choose 'later' → set a DATED callback (day + time) and keep your promise. Don't convert 'three months' into 'one to two'.",
   floor:"Marc: “So maybe Tuesday the 12th, 12pm — just a quick call, not a meeting yet.”"},
  {id:"funding",cat:"qualify",title:"Waiting on funding / budget approval",trig:"waiting on funding · seed round · budget approval",
   say:"Makes sense. When are you expecting that to land? (pause)\n\n(within ~2 months) Got it — and once it lands, when would you want someone starting?\n(later / unknown) No worries — let's not jump the gun. I'll call you around [date] when you've got clarity.",
@@ -531,8 +531,8 @@ const REBUTTALS = [
 
 // ============================== DO & DON'T ===============================
 const DOS = [
- ["Let the lead say the role, the hours and the timeline in their OWN words before you recap.","Pandr / HOPLA / Sterling disputes — the '1–2 months' came from the SDR, not the lead."],
- ["Ask the timeline as an OPEN question: “When would you ideally want them starting?”","Oct 26 Process Alignment"],
+ ["Let the lead say the role and the hours in their OWN words, and pick or confirm the timeline themselves, before you recap.","Pandr / HOPLA / Sterling disputes — the '1–2 months' was assumed by the SDR, not confirmed by the lead."],
+ ["Ask the timeline directly — give choices (“as soon as possible, 1–2 weeks, or within 2 months?”) or ask “Is that within the next 1 to 2 months?”","TL update, Nov 2026"],
  ["Reach and qualify the real decision-maker (or get them on the call).","Sterling dispute on Ryan Kenyon — 2 DCs cancelled"],
  ["Probe the tasks behind any on-site role — book only computer-based work.","Sterling dispute (production staff = on-site)"],
  ["Recruitment firms: confirm the role is for THEIR OWN team, not a client.","Huddle recap Sept 30"],
@@ -546,7 +546,7 @@ const DOS = [
  ["Set DATED callbacks for 'later' leads and keep your word.","UK EOFY deferrals (Huddle Sept 30)"]
 ];
 const DONTS = [
- ["Offer '1 to 2 months' for them to agree to, or round 3 months down.","Pandr disputes"],
+ ["Assume the timeline for them in the recap, or round 3 months down to '1–2 months'.","Pandr disputes"],
  ["Name or pitch roles before the lead tells you what they need.","Ritch: Call Flow Update (SP directive)"],
  ["Say 'source partners' / 'sourcing partners' to a lead.","Ritch: Corrections"],
  ["Promise candidate profiles, CVs or firm pricing on the DC.","Ritch: Corrections #3"],
@@ -567,7 +567,7 @@ const SAY_NOT = [
  ["I'll match you with two vetted partners who specialise in this role.","Our network includes thousands of outsourcing companies."],
  ["When the provider presents candidates to you…","When we bring the right people in front of you…"],
  ["Send it over so I can brief the providers before you meet them.","Send me the job description (and I'll find people)."],
- ["When would you ideally want them starting?","So that's within one to two months, right?"]
+ ["How soon would you want them starting — as soon as possible, 1–2 weeks, or within 2 months?","So that's within one to two months, right? (when they never said it)"]
 ];
 const FLOOR_WINS = [
  ["Marc","“Think recruitment, but offshore.” — the clearest one-line explanation on the floor."],
@@ -632,6 +632,7 @@ const store = {
   get(k, d){ try{ const v = localStorage.getItem("oaca2_"+k); return v ? JSON.parse(v) : d; }catch(e){ return d; } },
   set(k, v){ try{ localStorage.setItem("oaca2_"+k, JSON.stringify(v)); }catch(e){} }
 };
+const TL_BUCKETS = {asap:"As soon as possible",weeks:"In the next 1–2 weeks",now:"Within 2 months",later:"More than 2 months",funding:"Depends on funding / approval"};
 const blankGate = () => ({size:"",recruit:"na",role:"",tasks:"",computer:false,ft:"",ftWhy:"",timeline:"",tlBucket:"",offshore:"",dm:"",dmName:"",qa:false,policy:false,voucherOnly:false,showRisk:false,date:"",time:"",email:"",walkAway:"",headcount:""});
 const S = {
   region: store.get("region","AU"),
@@ -829,8 +830,7 @@ function verdict(){
   if(g.role.trim() && !g.computer) hold.push("Confirm the tasks are computer-based (offshore-suitable)");
   if(!g.ft) miss.push("Full-time 30–40h?");
   else if(g.ft!=="ft") no.push("Not full-time ("+({pt:"part-time",project:"project/ad-hoc",comm:"commission-only"}[g.ft])+") → don't book");
-  if(!g.timeline.trim()) miss.push("Timeline in their words");
-  if(!g.tlBucket) miss.push("Timeline bucket");
+  if(!g.tlBucket) miss.push("Hiring timeline");
   else if(g.tlBucket==="later") hold.push("Timeline beyond ~2 months → DATED callback, not a DC");
   else if(g.tlBucket==="funding") hold.push("Hiring depends on funding/approval → find the date, nurture");
   if(!g.offshore) miss.push("Spoken yes to offshore");
@@ -859,8 +859,8 @@ function renderGate(){
    <div class="row"><label>Tasks they described</label><textarea data-g="tasks" placeholder="e.g. quotes, invoicing, order updates">${esc(g.tasks)}</textarea>
      <span class="chk"><input type="checkbox" data-g="computer" ${g.computer?"checked":""}> Tasks are computer-based (can be done offshore)</span></div>
    <div class="row"><label>Hours</label><select data-g="ft"><option value="">—</option><option value="ft">Full-time 30–40h (they said it)</option><option value="pt">Part-time</option><option value="project">Project / ad-hoc / output-based</option><option value="comm">Commission-only</option></select></div>
-   <div class="row"><label>Timeline — their exact words</label><input type="text" data-g="timeline" value="${esc(g.timeline)}" placeholder="e.g. “early January”"></div>
-   <div class="row"><select data-g="tlBucket"><option value="">Timeline bucket…</option><option value="now">Within ~2 months</option><option value="later">More than 2 months</option><option value="funding">Depends on funding / approval</option></select></div>
+   <div class="row"><label>Hiring timeline — what the lead picked</label><select data-g="tlBucket"><option value="">—</option>${Object.entries(TL_BUCKETS).map(([v,l])=>`<option value="${v}">${l}</option>`).join("")}</select>
+     <input type="text" data-g="timeline" value="${esc(g.timeline)}" placeholder="Extra detail (optional) — e.g. “before Christmas”"></div>
    <div class="row"><label>Open to offshore?</label><select data-g="offshore"><option value="">—</option><option value="yes">Spoken YES</option><option value="maybe">Maybe / hesitant</option><option value="no">No — must be local</option></select></div>
    <div class="row"><label>Decision-maker</label><select data-g="dm"><option value="">—</option><option value="yes">Yes — they sign off</option><option value="joint">Joint — other person joining the call</option><option value="other">Someone else — not reached yet</option></select>
      <input type="text" data-g="dmName" value="${esc(g.dmName)}" placeholder="Other decision-maker's name (if any)"></div>
@@ -893,7 +893,8 @@ function updateVerdictOnly(){
 // ============================== RECAP & LOG ==============================
 function renderLog(){
   const g = S.gate, t = tokens(), L = t.lead||"[name]";
-  const tl = g.timeline ? `“${g.timeline}”` : "[their timeline, in their words]";
+  const tlPick = {asap:"you'd want someone as soon as possible",weeks:"you'd want someone in the next 1 to 2 weeks",now:"you'd want someone within the next 2 months",later:"it's more than 2 months away",funding:"it depends on funding or approval"}[g.tlBucket];
+  const tl = (tlPick || "[their timeline]") + (g.timeline ? ` — “${g.timeline}”` : "");
   const dmText = g.dm==="yes" ? "you're the one who signs off" : g.dm==="joint" ? `you'll decide together with ${g.dmName||"[name]"}, who'll join the call` : "[who signs off]";
   const slot = t["weekday-slot"] || "[day, date at time]";
   const recap = `Just to recap so I've got it right, ${L}:
@@ -912,7 +913,7 @@ Headcount (lead-stated): ${g.size||"—"}${g.recruit==="internal"?" · Recruitme
 Role (lead's words): ${g.role||"—"}
 Tasks (lead's words): ${g.tasks||"—"}
 Hours: ${({ft:"Full-time 30–40h (lead confirmed)",pt:"Part-time",project:"Project/ad-hoc",comm:"Commission-only"})[g.ft]||"—"}
-Timeline (lead's words): ${g.timeline?`"${g.timeline}"`:"—"}
+Timeline (lead picked): ${TL_BUCKETS[g.tlBucket]||"—"}${g.timeline?` · "${g.timeline}"`:""}
 Open to offshore: ${({yes:"Yes (spoken)",maybe:"Maybe",no:"No"})[g.offshore]||"—"}
 Decision-maker: ${({yes:"Lead",joint:"Joint with "+(g.dmName||"?"),other:"Other — not reached"})[g.dm]||"—"}
 Wants to walk away knowing: ${g.walkAway?`"${g.walkAway}"`:"—"}
@@ -967,7 +968,7 @@ function renderRules(){
   <div class="two"><div class="card"><h3 style="color:var(--green)">✔ Do</h3><ol class="dd">${DOS.map(([d,s])=>`<li>${esc(d)}<div class="src">${esc(s)}</div></li>`).join("")}</ol></div>
   <div class="card"><h3 style="color:var(--red)">✕ Don't</h3><ol class="dd">${DONTS.map(([d,s])=>`<li>${esc(d)}<div class="src">${esc(s)}</div></li>`).join("")}</ol></div></div>
   <div class="card" style="margin-top:12px"><h3>Say this, not that</h3><table class="say-not"><tr><th>Say</th><th>Not</th></tr>${SAY_NOT.map(([a,b])=>`<tr><td>✔ ${esc(a)}</td><td style="color:var(--red)">✕ ${esc(b)}</td></tr>`).join("")}</table></div>
-  <div class="card" style="margin-top:12px"><h3>The 5 things every DC needs, in the lead's own words</h3><ol class="dd"><li>Role / tasks that can be done on a computer (offshore-suitable)</li><li>Full-time, 30–40 hours (not part-time, project or commission-only)</li><li>Hiring timeline within ~1–2 months — THEIR words</li><li>A spoken yes to offshore</li><li>The decision-maker on the call (and ${CONFIG.minEmployees}+ active employees)</li></ol></div>`;
+  <div class="card" style="margin-top:12px"><h3>The 5 things every DC needs, confirmed by the lead</h3><ol class="dd"><li>Role / tasks that can be done on a computer (offshore-suitable)</li><li>Full-time, 30–40 hours (not part-time, project or commission-only)</li><li>Hiring timeline within ~2 months — the lead picks or confirms it (ASAP, 1–2 weeks, within 2 months)</li><li>A spoken yes to offshore</li><li>The decision-maker on the call (and ${CONFIG.minEmployees}+ active employees)</li></ol></div>`;
 }
 
 // ============================== STATS / GAME =============================
