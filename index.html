@@ -116,6 +116,14 @@ input,select,textarea{font-family:inherit;font-size:13px}
 .searchbar{display:flex;gap:8px;margin-bottom:12px}
 .searchbar input{flex:1;border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-size:14px}
 .rgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:12px}
+.roleMeta{font-size:12px;color:var(--muted);margin:-4px 0 10px}
+.rcard .rcat{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:var(--pink)}
+.rcard .rdo{font-size:13.5px;margin:6px 0 8px}
+.rcard .rkw{font-size:11.5px;color:var(--muted);margin-bottom:8px}
+.rcard .rind{font-size:11px;color:var(--muted);margin-bottom:10px}
+.rcard .rfit{display:inline-block;font-size:10.5px;font-weight:700;background:#e7f6ee;color:#137a43;border-radius:5px;padding:1px 6px;margin-left:6px;vertical-align:middle}
+.rcard mark{background:#fff1a8;padding:0 1px;border-radius:2px}
+.rcard button.use{border:1px solid var(--line);border-radius:7px;padding:5px 10px;background:#fff;font-weight:700;font-size:12px}
 .rcard{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px}
 .rcard h4{margin:0 0 4px;font-size:14.5px}
 .rcard .trig{font-size:11.5px;color:var(--muted);font-style:italic;margin-bottom:6px}
@@ -154,6 +162,7 @@ table.say-not th{font-size:11px;letter-spacing:.07em;text-transform:uppercase;co
   <div class="tabs" id="tabs">
     <button data-tab="live" class="on">LIVE CALL</button>
     <button data-tab="rebuttals">REBUTTALS <span class="kbd">/</span></button>
+    <button data-tab="roles">ROLE FINDER</button>
     <button data-tab="regions">REGION GUIDE</button>
     <button data-tab="rules">DO &amp; DON'T</button>
     <button data-tab="log">RECAP &amp; LOG</button>
@@ -198,6 +207,12 @@ table.say-not th{font-size:11px;letter-spacing:.07em;text-transform:uppercase;co
 <section id="tab-rebuttals" class="hidden"><div class="page">
   <div class="searchbar"><input id="rSearch" placeholder="Type what the lead said… e.g. 'send me an email', 'how much', 'we have a recruiter'"></div>
   <div class="rgrid" id="rGrid"></div>
+</div></section>
+
+<section id="tab-roles" class="hidden"><div class="page">
+  <div class="searchbar"><input id="roleSearch" placeholder="Type what the lead said… e.g. 'invoices', 'quotes', 'AutoCAD', 'chasing payments', 'social media'"></div>
+  <div class="roleMeta" id="roleMeta"></div>
+  <div class="rgrid" id="roleGrid"></div>
 </div></section>
 
 <section id="tab-regions" class="hidden"><div class="page">
@@ -298,6 +313,97 @@ const INDUSTRY_ROLES = {
   "Utilities":["billing specialist","customer service rep","GIS technician","data analyst","scheduling coordinator","document controller"],
   "Wholesale":["order processing admin","customer service rep","purchasing officer","inventory coordinator","accounts receivable clerk","sales support"]
 };
+// ============================== ROLE DIRECTORY ===========================
+// n = role name · a = role names used in INDUSTRY_ROLES that map here · d = what they do
+// k = words a lead might use when describing the day-to-day work (tasks, software, outputs)
+const ROLE_DIR = [
+ // --- Admin & operations
+ {n:"Admin assistant",c:"Admin & operations",a:["admin assistant","construction admin","planning admin","practice admin","client services admin","back-office operations"],d:"Handles the day-to-day office admin so the team can focus on the real work.",k:"admin paperwork filing emails inbox data entry spreadsheets excel forms updating records calendar booking typing documents office tasks back office"},
+ {n:"Executive assistant",c:"Admin & operations",a:["executive assistant","executive / virtual assistant"],d:"Supports an owner or senior manager — runs their inbox, diary, travel and follow-ups.",k:"inbox calendar diary meetings scheduling travel bookings follow ups reminders owner ceo director personal assistant pa errands prioritising emails"},
+ {n:"Virtual assistant",c:"Admin & operations",a:["virtual assistant","real estate virtual assistant"],d:"A general remote helper for admin, emails, research and small repeat tasks.",k:"general admin emails research data entry social posting calendar crm updates small tasks bits and pieces whatever needs doing"},
+ {n:"Virtual receptionist",c:"Admin & operations",a:["virtual receptionist","virtual medical receptionist"],d:"Answers calls, takes messages and books appointments from a remote desk.",k:"answering phones calls missed calls messages front desk reception enquiries bookings appointments transferring calls"},
+ {n:"Data entry specialist",c:"Admin & operations",a:["data entry specialist","data entry / cleansing"],d:"Keys in, cleans and updates data in spreadsheets, CRMs and systems.",k:"data entry typing spreadsheets excel updating records crm cleanup cleansing duplicates uploading forms copying keying"},
+ {n:"Document controller",c:"Admin & operations",a:["document controller"],d:"Keeps project documents, drawings and revisions filed, tracked and up to date.",k:"documents drawings revisions version control filing transmittals sharepoint aconex procore registers"},
+ {n:"Scheduling coordinator",c:"Admin & operations",a:["scheduling coordinator","dispatch / scheduling coordinator","scheduler / planner","rostering / scheduling coordinator","service scheduler","booking coordinator","booking admin"],d:"Builds and juggles the schedule — jobs, staff rosters, bookings and changes.",k:"scheduling rosters roster shifts bookings calendar jobs allocating technicians crews rescheduling appointments planning the week servicem8 simpro"},
+ {n:"Project coordinator",c:"Admin & operations",a:["project coordinator","production coordinator"],d:"Keeps projects on track — timelines, updates, documents and chasing people.",k:"project tracking timelines updates chasing suppliers clients status reports meeting notes coordination monday asana trello"},
+ {n:"Project manager",c:"Admin & operations",a:["project manager"],d:"Owns delivery of projects end to end — scope, timeline, team and client updates.",k:"project management delivery scope sprints jira agile client updates managing developers deadlines"},
+ {n:"Compliance admin",c:"Admin & operations",a:["compliance admin","HSE admin","driver compliance admin","permits & grants admin","regulatory affairs assistant","rights & permissions admin"],d:"Tracks licences, permits, safety records and compliance paperwork.",k:"compliance licences permits safety hse whs swms inductions audits records certificates expiry registers grants regulatory"},
+ {n:"Order processing admin",c:"Admin & operations",a:["order processing admin","order processing / sales admin","order & inventory admin","provisioning / order admin","work order admin"],d:"Takes orders from email, phone or portal and processes them through to dispatch.",k:"orders order entry purchase orders processing sales orders invoicing dispatch tracking order updates portal work orders"},
+ {n:"Sales support",c:"Admin & operations",a:["sales admin","sales support","CRM / sales admin","quoting & sales support","proposals & sales support","parts & sales support","quoting & customer service"],d:"Backs up the sales team — quotes, proposals, CRM updates and follow-ups.",k:"quotes quoting proposals crm hubspot salesforce follow ups leads pipeline price lists tenders sales team backup"},
+ {n:"Purchasing officer",c:"Admin & operations",a:["purchasing officer","purchasing assistant","procurement officer","procurement assistant"],d:"Raises purchase orders, chases suppliers and compares prices.",k:"purchasing procurement suppliers purchase orders buying ordering stock chasing deliveries comparing prices vendors"},
+ {n:"Inventory coordinator",c:"Admin & operations",a:["inventory coordinator","inventory / data analyst"],d:"Keeps stock levels, counts and reorders accurate in the system.",k:"inventory stock levels stocktake reorders warehouse system sku counts cin7 unleashed"},
+ // --- Customer
+ {n:"Customer service rep",c:"Customer & support",a:["customer service rep","customer support","client support","guest services (remote)"],d:"Answers customer emails, chats and calls — orders, questions and complaints.",k:"customer service emails phones live chat enquiries complaints refunds returns tickets zendesk gorgias helpdesk customer questions"},
+ {n:"Client services officer",c:"Customer & support",a:["client services officer","account coordinator","renewals coordinator","membership admin"],d:"Looks after existing clients — updates, renewals, paperwork and relationships.",k:"existing clients account management renewals memberships client updates onboarding paperwork retention"},
+ {n:"Technical support / IT helpdesk",c:"Customer & support",a:["technical support","IT helpdesk support","helpdesk support"],d:"Fixes user and customer tech issues by ticket, chat or remote access.",k:"it support helpdesk tickets troubleshooting password resets laptops users software issues remote support level 1"},
+ {n:"Reservations agent",c:"Customer & support",a:["reservations agent","registration & ticketing support","vendor & booking admin"],d:"Handles bookings, reservations and ticketing enquiries.",k:"reservations bookings tickets registrations guests availability booking system enquiries changes cancellations"},
+ {n:"Travel consultant",c:"Customer & support",a:["travel consultant","itinerary planner"],d:"Plans and books trips and itineraries for clients.",k:"travel itineraries flights hotels tours bookings quotes holiday packages"},
+ {n:"Event coordinator",c:"Customer & support",a:["event coordinator"],d:"Organises events remotely — suppliers, run sheets, registrations and comms.",k:"events run sheets suppliers venues registrations attendees logistics planning"},
+ // --- Finance
+ {n:"Bookkeeper",c:"Finance & accounting",a:["bookkeeper","trust accounts / bookkeeper"],d:"Keeps the books — enters transactions, reconciles accounts and prepares reports.",k:"bookkeeping xero quickbooks myob reconciliation bank recs entering bills receipts gst bas vat ledgers month end accounts"},
+ {n:"Accounts payable / receivable clerk",c:"Finance & accounting",a:["accounts payable clerk","accounts receivable clerk","accounts payable / receivable clerk","freight billing / invoicing","billing specialist"],d:"Pays supplier bills, sends invoices and chases customers who haven't paid.",k:"invoices invoicing billing chasing payments overdue debtors creditors paying bills supplier invoices collections statements accounts payable receivable"},
+ {n:"Payroll officer",c:"Finance & accounting",a:["payroll officer"],d:"Runs payroll — timesheets, pay runs, leave and super/pension.",k:"payroll pay runs wages timesheets leave super pension superannuation employment hero keypay adp"},
+ {n:"Junior accountant",c:"Finance & accounting",a:["junior accountant","audit assistant","reconciliation officer"],d:"Prepares accounts, reconciliations and workpapers for a senior accountant to review.",k:"accounts preparation financial statements workpapers reconciliations audit year end journals accountant support"},
+ {n:"Tax preparer",c:"Finance & accounting",a:["tax preparer"],d:"Prepares tax returns and supporting workpapers for review.",k:"tax returns individual company returns lodgements tax season workpapers"},
+ {n:"Financial analyst",c:"Finance & accounting",a:["financial analyst","credit analyst"],d:"Builds reports, forecasts and models to explain the numbers.",k:"financial reports forecasting budgets modelling excel analysis cash flow credit assessments"},
+ {n:"Paraplanner",c:"Finance & accounting",a:["paraplanner"],d:"Supports financial advisers — research, statements of advice and client files.",k:"financial advice soa statements of advice adviser support client files research super insurance"},
+ {n:"Loan processor",c:"Finance & accounting",a:["loan processor"],d:"Prepares and tracks loan applications from submission through to settlement.",k:"loans mortgages applications lodging broker support settlements documents lenders"},
+ {n:"KYC / AML analyst",c:"Finance & accounting",a:["KYC / AML analyst"],d:"Checks customer identity and screens for fraud and money-laundering risk.",k:"kyc aml identity checks onboarding checks fraud screening compliance verification"},
+ {n:"Revenue & night audit (hospitality)",c:"Finance & accounting",a:["night audit (remote)","revenue / channel manager"],d:"Balances the day's takings and manages room rates across booking sites.",k:"night audit rates channel manager booking.com expedia room rates occupancy pms reconciling takings"},
+ // --- Insurance & healthcare
+ {n:"Claims / policy processor",c:"Insurance & healthcare",a:["claims processor","policy admin","underwriting assistant"],d:"Processes insurance claims, policies, renewals and underwriting paperwork.",k:"claims policies renewals underwriting quotes endorsements insurance paperwork"},
+ {n:"Insurance verification specialist",c:"Insurance & healthcare",a:["insurance verification specialist"],d:"Checks patient or client insurance cover and benefits before services.",k:"insurance verification eligibility benefits cover checks pre authorisation"},
+ {n:"Medical biller / coder",c:"Insurance & healthcare",a:["medical biller","medical biller / coder"],d:"Codes treatments and submits and follows up medical billing and claims.",k:"medical billing coding claims medicare insurance claims rejections follow ups icd"},
+ {n:"Medical scribe",c:"Insurance & healthcare",a:["medical scribe"],d:"Writes up clinical notes from consults so doctors spend less time typing.",k:"clinical notes consult notes documentation doctors dictation charting"},
+ {n:"Medical virtual assistant",c:"Insurance & healthcare",a:["medical virtual assistant","patient scheduler","health information admin"],d:"Handles clinic admin — patient bookings, records, referrals and recalls.",k:"patient bookings appointments recalls referrals records clinic admin reminders practice management"},
+ // --- Legal
+ {n:"Paralegal",c:"Legal",a:["paralegal","document review"],d:"Supports lawyers with research, drafting, document review and file prep.",k:"legal research drafting documents discovery document review court filings briefs matters"},
+ {n:"Legal assistant / secretary",c:"Legal",a:["legal assistant","legal secretary"],d:"Runs a lawyer's admin — correspondence, diary, files and document formatting.",k:"legal admin correspondence letters diary files formatting documents typing dictation"},
+ {n:"Conveyancing clerk",c:"Legal",a:["conveyancing clerk"],d:"Prepares and tracks property settlement paperwork.",k:"conveyancing settlements property contracts searches pexa"},
+ {n:"Legal billing / trust accounts",c:"Legal",a:["legal billing / trust accounts"],d:"Handles client billing, time records and trust account reconciliations.",k:"legal billing trust accounting time entries invoices reconciliations"},
+ // --- Real estate
+ {n:"Property management assistant",c:"Real estate",a:["property management assistant","leasing admin"],d:"Supports property managers — tenant emails, maintenance, leases and inspections.",k:"property management tenants maintenance requests leases rent arrears inspections landlords tradies propertyme property tree"},
+ {n:"Transaction coordinator",c:"Real estate",a:["transaction coordinator"],d:"Manages a sale from contract to close — paperwork, deadlines and parties.",k:"contracts deadlines closings settlements paperwork agents buyers sellers"},
+ {n:"Listings & marketing coordinator",c:"Real estate",a:["listings & marketing coordinator"],d:"Gets properties listed and marketed — copy, photos, portals and socials.",k:"listings portals realestate.com.au domain zillow property marketing photos copy brochures"},
+ // --- Engineering & technical design
+ {n:"CAD drafter",c:"Engineering & design",a:["CAD drafter","architectural drafter (CAD)","civil drafter (Civil 3D / CAD)","mechanical drafter (CAD)","electrical drafter (CAD)","engineering drafter (CAD)","mining drafter (CAD)","solar designer (CAD)"],d:"Turns sketches and markups into accurate technical drawings.",k:"drawings drafting autocad cad civil 3d plans markups redlines shop drawings layouts schematics solar layouts"},
+ {n:"Revit / BIM modeller",c:"Engineering & design",a:["Revit / BIM modeller"],d:"Builds 3D building models and drawing sets in Revit/BIM software.",k:"revit bim 3d model building model archicad clash detection drawing sets"},
+ {n:"3D visualiser",c:"Engineering & design",a:["3D visualiser","3D artist / renderer"],d:"Creates realistic 3D renders and walkthroughs of designs and products.",k:"3d renders rendering visualisation walkthroughs sketchup 3ds max lumion product renders"},
+ {n:"Design engineer",c:"Engineering & design",a:["design engineer","design engineer (SolidWorks)","design / verification engineer","PCB designer"],d:"Designs and checks components and systems — calcs, models and specs.",k:"engineering design calculations solidworks inventor 3d modelling specs pcb altium circuits verification"},
+ {n:"Estimator",c:"Engineering & design",a:["estimator"],d:"Prices jobs — takes off quantities from plans and builds the quote.",k:"estimating quotes quoting take offs takeoffs plans pricing jobs tenders bids costings buildxact cubit"},
+ {n:"Quantity surveyor",c:"Engineering & design",a:["quantity surveyor"],d:"Measures and costs construction work — take-offs, variations and claims.",k:"quantity surveying take offs cost plans variations progress claims bills of quantities"},
+ {n:"GIS technician",c:"Engineering & design",a:["GIS technician","geology / data technician"],d:"Builds and updates maps and location data.",k:"gis maps mapping arcgis qgis spatial data geology survey data"},
+ {n:"Technical writer",c:"Engineering & design",a:["technical writer","report writer","QA documentation officer"],d:"Writes manuals, reports, procedures and quality documents.",k:"manuals procedures reports sops documentation quality documents writing specs instructions"},
+ {n:"Production planner",c:"Engineering & design",a:["production planner"],d:"Plans production runs, materials and capacity to hit delivery dates.",k:"production planning schedules materials capacity manufacturing mrp"},
+ {n:"Parts interpreter",c:"Engineering & design",a:["parts interpreter","service & warranty admin"],d:"Finds the right parts, prepares parts quotes and handles warranty claims.",k:"parts catalogues part numbers parts quotes warranty claims service department"},
+ // --- IT
+ {n:"Software developer",c:"IT & software",a:["software developer"],d:"Builds and maintains software, apps and integrations.",k:"software development coding apps applications programming integrations apis python javascript react dotnet java bugs features"},
+ {n:"Web developer",c:"IT & software",a:["web developer"],d:"Builds and updates websites and online stores.",k:"website web development wordpress shopify webflow landing pages site updates html css"},
+ {n:"QA tester",c:"IT & software",a:["QA tester"],d:"Tests software to find bugs before customers do.",k:"testing qa bugs test cases regression manual testing automation"},
+ {n:"DevOps / cloud engineer",c:"IT & software",a:["DevOps / cloud engineer"],d:"Runs servers, cloud infrastructure and deployments.",k:"devops cloud aws azure servers deployments infrastructure ci cd"},
+ {n:"Network administrator",c:"IT & software",a:["network administrator","network engineer"],d:"Sets up and looks after networks, servers and user access.",k:"networks servers firewalls user accounts microsoft 365 active directory backups"},
+ {n:"Cybersecurity analyst",c:"IT & software",a:["SOC analyst","security engineer","compliance analyst"],d:"Monitors systems for threats and keeps security and compliance in check.",k:"cyber security soc monitoring alerts threats vulnerabilities compliance iso 27001 incidents"},
+ {n:"Remote monitoring operator",c:"IT & software",a:["remote monitoring operator"],d:"Watches alarms and camera feeds and dispatches responses.",k:"cctv cameras alarms monitoring dispatch security monitoring"},
+ {n:"Instructional designer / LMS admin",c:"IT & software",a:["instructional designer","LMS admin"],d:"Builds online courses and runs the learning platform.",k:"courses training modules elearning lms articulate kajabi teachable course content"},
+ // --- Data & research
+ {n:"Data analyst",c:"Data & research",a:["data analyst","environmental data analyst"],d:"Turns data into reports and dashboards people can act on.",k:"data reports reporting dashboards power bi excel analysis kpis sql metrics"},
+ {n:"Research assistant",c:"Data & research",a:["research assistant","research analyst","literature reviewer","investigations researcher","survey / panel coordinator","media monitoring analyst"],d:"Finds, checks and summarises information.",k:"research lead lists market research summaries surveys investigations sourcing information media monitoring"},
+ // --- Marketing & creative
+ {n:"Marketing assistant",c:"Marketing & creative",a:["marketing assistant","digital marketing assistant","PR assistant"],d:"Helps run marketing — emails, posts, campaigns and simple design.",k:"marketing campaigns email marketing newsletters mailchimp klaviyo canva posts promotions press releases"},
+ {n:"Social media manager",c:"Marketing & creative",a:["social media manager","social media coordinator","social media / content creator"],d:"Plans, creates and posts social content and replies to comments.",k:"social media instagram facebook tiktok linkedin posts content calendar captions comments reels"},
+ {n:"Content writer",c:"Marketing & creative",a:["content writer","editor / proofreader","content coordinator"],d:"Writes and edits blogs, web copy, emails and other content.",k:"writing blogs articles copywriting web copy newsletters editing proofreading content"},
+ {n:"SEO specialist",c:"Marketing & creative",a:["SEO specialist"],d:"Improves Google rankings so more people find the website.",k:"seo google rankings keywords backlinks search traffic website optimisation"},
+ {n:"Paid ads (PPC) specialist",c:"Marketing & creative",a:["paid ads (PPC) specialist"],d:"Runs and optimises paid ads on Google, Meta and similar.",k:"google ads facebook ads meta ads ppc paid ads campaigns ad spend"},
+ {n:"Graphic designer",c:"Marketing & creative",a:["graphic designer","prepress / graphic designer","production artist","typesetter / layout designer","presentation designer"],d:"Designs graphics, layouts, presentations and print or digital assets.",k:"design graphics canva photoshop illustrator indesign logos flyers brochures presentations powerpoint layouts artwork print"},
+ {n:"UI / UX designer",c:"Marketing & creative",a:["UI / UX designer"],d:"Designs how websites and apps look and work for users.",k:"ui ux figma app design wireframes prototypes user experience"},
+ {n:"Video editor",c:"Marketing & creative",a:["video editor","video editor / analyst","motion graphics designer"],d:"Edits videos and creates motion graphics for social, ads and training.",k:"video editing premiere after effects reels youtube motion graphics animations clips"},
+ {n:"Transcription / captioning",c:"Marketing & creative",a:["transcription / captioning"],d:"Types up audio and video into transcripts and captions.",k:"transcription transcripts captions subtitles audio typing"},
+ {n:"E-commerce assistant",c:"Marketing & creative",a:["e-commerce assistant","e-commerce / product listing assistant","product listing specialist"],d:"Runs the online store — product listings, prices, stock and orders.",k:"ecommerce online store shopify amazon ebay product listings uploads descriptions prices orders marketplace"},
+ // --- Logistics
+ {n:"Dispatcher",c:"Logistics",a:["dispatcher"],d:"Assigns jobs and loads to drivers and tracks them through the day.",k:"dispatch drivers trucks loads routes tracking jobs allocating runs"},
+ {n:"Logistics coordinator",c:"Logistics",a:["logistics coordinator","freight coordinator"],d:"Books freight, tracks shipments and keeps customers updated.",k:"freight shipments bookings carriers tracking consignments logistics deliveries"},
+ {n:"Customs & documentation clerk",c:"Logistics",a:["customs & documentation clerk"],d:"Prepares shipping and customs paperwork.",k:"customs documentation shipping documents bills of lading import export paperwork"}
+];
 const COMMON_ROLES = ["admin assistant","executive assistant","virtual assistant","customer service rep","bookkeeper","data entry specialist","marketing assistant","graphic designer"];
 
 // ============================== REGIONS ==================================
@@ -856,11 +962,12 @@ function renderGate(){
    <div class="verdict ${v.cls}"><span class="big">${v.big}</span><ul>${v.items.map(i=>`<li>${esc(i)}</li>`).join("")}</ul></div>
    <div class="row"><label>Active employees (their number)</label><input type="number" data-g="size" value="${esc(g.size)}" placeholder="e.g. 30"></div>
    <div class="row"><label>Recruitment / staffing firm?</label><select data-g="recruit"><option value="na">Not a recruitment firm</option><option value="internal">Yes — role is for their OWN team</option><option value="client">Yes — role is for a CLIENT</option></select></div>
+   <div class="row"><label>Tasks they described — ask this FIRST</label><textarea data-g="tasks" placeholder="e.g. quotes, invoicing, order updates">${esc(g.tasks)}</textarea>
+     <button class="copy" id="findRole" style="justify-self:start">🔎 Find the matching role from these tasks</button>
+     <span class="chk"><input type="checkbox" data-g="computer" ${g.computer?"checked":""}> Tasks are computer-based (can be done offshore)</span></div>
    <div class="row"><label>Role — in their words</label><input type="text" data-g="role" value="${esc(g.role)}" placeholder="e.g. admin assistant">
      <select id="rolePick"><option value="">${S.f.industry&&INDUSTRY_ROLES[S.f.industry]?"Quick-pick a common "+esc(S.f.industry)+" role…":"Quick-pick a common role…"}</option>${INDUSTRY_ROLES[S.f.industry]?`<optgroup label="${esc(S.f.industry)}">${INDUSTRY_ROLES[S.f.industry].map(r=>`<option>${esc(r)}</option>`).join("")}</optgroup>`:""}<optgroup label="Any industry">${COMMON_ROLES.map(r=>`<option>${esc(r)}</option>`).join("")}</optgroup></select>
      <span class="chk" style="color:var(--muted)">Pick only what THEY said — never suggest a role first.</span></div>
-   <div class="row"><label>Tasks they described</label><textarea data-g="tasks" placeholder="e.g. quotes, invoicing, order updates">${esc(g.tasks)}</textarea>
-     <span class="chk"><input type="checkbox" data-g="computer" ${g.computer?"checked":""}> Tasks are computer-based (can be done offshore)</span></div>
    <div class="row"><label>Hours</label><select data-g="ft"><option value="">—</option><option value="ft">Full-time 30–40h (they said it)</option><option value="pt">Part-time</option><option value="project">Project / ad-hoc / output-based</option><option value="comm">Commission-only</option></select></div>
    <div class="row"><label>Hiring timeline — what the lead picked</label><select data-g="tlBucket"><option value="">—</option>${Object.entries(TL_BUCKETS).map(([v,l])=>`<option value="${v}">${l}</option>`).join("")}</select>
      <input type="text" data-g="timeline" value="${esc(g.timeline)}" placeholder="Extra detail (optional) — e.g. “before Christmas”"></div>
@@ -886,6 +993,10 @@ function renderGate(){
     if(!e.target.value) return;
     const inp = $('#gate [data-g="role"]'); inp.value = e.target.value; e.target.value = "";
     inp.oninput();
+  };
+  $("#findRole").onclick = () => {
+    if(!g.tasks.trim()){ toast("Ask about their day-to-day tasks first, then type them here"); return; }
+    $("#roleSearch").value = g.tasks; showTab("roles");
   };
 }
 function updateVerdictOnly(){
@@ -1063,13 +1174,69 @@ function celebrate(){
   toast(msgs[Math.floor(Math.random()*msgs.length)]);
 }
 
+// ============================== ROLE FINDER ==============================
+// Task-first: the rep types the work the LEAD described, the finder names the role.
+const STOP = new Set("a an and or the of to for in on at by with from do does doing they them their we our us i me my you your it its is are be been that this these those someone somebody person people need needs want wants help helps lot lots stuff things thing all more some just like really also etc mainly mostly kind sort work job role day daily".split(" "));
+const stem = w => w.replace(/(ings|ing|ers|er|es|ed|s)$/,"");
+const words = s => s.toLowerCase().replace(/[^a-z0-9.+ ]/g," ").split(/\s+/).filter(w=>w.length>1 && !STOP.has(w)).map(stem).filter(Boolean);
+function near(a,b){ // a and b are stems; prefix either way, or one typo for longer words
+  if(a===b) return true;
+  if(Math.min(a.length,b.length)>=5 && (a.startsWith(b)||b.startsWith(a))) return true;
+  if(a.length<5 || Math.abs(a.length-b.length)>1) return false;
+  let i=0,j=0,edits=0;
+  while(i<a.length && j<b.length){ if(a[i]===b[j]){i++;j++;continue;} if(++edits>1) return false; if(a.length>b.length) i++; else if(b.length>a.length) j++; else {i++;j++;} }
+  return edits + (a.length-i) + (b.length-j) <= 1;
+}
+ROLE_DIR.forEach(r=>{ r._name = words(r.n+" "+r.a.join(" ")); r._kw = r.k.split(" ").map(w=>[w,stem(w)]); r._d = words(r.d); });
+function roleIndustries(r){ return Object.keys(INDUSTRY_ROLES).filter(i=>INDUSTRY_ROLES[i].some(x=>r.a.includes(x))); }
+function findRoles(q){
+  const qs = words(q), ind = S.f.industry;
+  if(!qs.length) return ROLE_DIR.map(r=>({r,score:0,hits:[]}));
+  return ROLE_DIR.map(r=>{
+    let score=0, matched=0; const hits=new Set();
+    qs.forEach(t=>{
+      let best=0;
+      if(r._name.some(w=>near(t,w))) best=5;
+      const kw = r._kw.filter(([w,s])=>near(t,s)); if(kw.length){ best=Math.max(best,3); kw.forEach(([w])=>hits.add(w)); }
+      if(!best && r._d.some(w=>near(t,w))) best=1;
+      if(best){ score+=best; matched++; }
+    });
+    if(score && ind && INDUSTRY_ROLES[ind] && INDUSTRY_ROLES[ind].some(x=>r.a.includes(x))) score+=2;
+    return {r,score:score+matched*2,hits:[...hits]};
+  }).filter(x=>x.score>0).sort((a,b)=>b.score-a.score);
+}
+function renderRoles(){
+  const q = $("#roleSearch").value, res = findRoles(q), ind = S.f.industry;
+  $("#roleMeta").innerHTML = `<b style="color:var(--pink)">Tasks first.</b> Ask about their day-to-day work before any role comes up, then type what THEY described. This helps you log the right role — never use it to suggest one. `
+    + (q.trim() ? `${res.length} match${res.length===1?"":"es"}${ind?` · roles common in <b>${esc(ind)}</b> ranked higher`:""}.` : `${ROLE_DIR.length} roles in the directory.`);
+  $("#roleGrid").innerHTML = res.slice(0,q.trim()?12:ROLE_DIR.length).map(({r,hits},i)=>{
+    const inds = roleIndustries(r), fit = ind && inds.includes(ind);
+    const kws = hits.concat(r.k.split(" ").filter(w=>!hits.includes(w))).slice(0,10);
+    return `<div class="rcard"><div class="rcat">${esc(r.c)}</div>
+      <h4>${esc(r.n)}${fit?`<span class="rfit">Common in ${esc(ind)}</span>`:""}</h4>
+      <div class="rdo">${esc(r.d)}</div>
+      <div class="rkw">Lead might say: ${kws.map(w=>hits.includes(w)?`<mark>${esc(w)}</mark>`:esc(w)).join(", ")}</div>
+      ${inds.length?`<div class="rind">Seen in: ${inds.slice(0,6).map(esc).join(" · ")}${inds.length>6?` +${inds.length-6} more`:""}</div>`:""}
+      <button class="use" data-ri="${ROLE_DIR.indexOf(r)}">Log as their role →</button></div>`;
+  }).join("") || `<div class="card">No match. Try the exact words the lead used for the work — e.g. "invoices", "drawings", "bookings".</div>`;
+  $$("#roleGrid button.use").forEach(b=>b.onclick=()=>{
+    const r = ROLE_DIR[b.dataset.ri], q = $("#roleSearch").value.trim();
+    S.gate.role = r.n.toLowerCase();
+    if(q && !S.gate.tasks.trim()) S.gate.tasks = q;
+    save(); renderGate(); renderStep(); renderLog(); showTab("live");
+    toast("Logged role: "+esc(r.n)+" — confirm it with the lead");
+  });
+}
+$("#roleSearch").oninput = renderRoles;
+
 // ============================== UTIL / NAV ===============================
 function toast(m){ const t=$("#toast"); t.innerHTML=m; t.classList.add("show"); clearTimeout(t._h); t._h=setTimeout(()=>t.classList.remove("show"),2600); }
 async function copyText(s){ try{ await navigator.clipboard.writeText(s); toast("Copied"); }catch(e){ toast("Copy blocked — select the text and Ctrl+C"); } }
 function showTab(name){
   $$("#tabs button").forEach(b=>b.classList.toggle("on",b.dataset.tab===name));
-  ["live","rebuttals","regions","rules","log","me"].forEach(t=>$("#tab-"+t).classList.toggle("hidden",t!==name));
+  ["live","rebuttals","roles","regions","rules","log","me"].forEach(t=>$("#tab-"+t).classList.toggle("hidden",t!==name));
   if(name==="rebuttals"){ renderRebuttals(); setTimeout(()=>$("#rSearch").focus(),50); }
+  if(name==="roles"){ renderRoles(); setTimeout(()=>$("#roleSearch").focus(),50); }
   if(name==="regions") renderRegions();
   if(name==="rules") renderRules();
   if(name==="log") renderLog();
